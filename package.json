@@ -1,0 +1,23 @@
+{
+  "name": "pandora-cli",
+  "version": "0.0.1",
+  "description": "pandora cli",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pandolajs/pandora-cli.git"
+  },
+  "keywords": [
+    "pandorajs",
+    "cli"
+  ],
+  "author": "JohnHou",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pandolajs/pandora-cli/issues"
+  },
+  "homepage": "https://github.com/pandolajs/pandora-cli#readme"
+}
