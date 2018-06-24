@@ -6,6 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "pandola": "./bin/cli.js",
+    "pa": "./bin/cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pandolajs/pandora-cli.git"
@@ -25,6 +29,8 @@
     "eslint-config-pandola": "^2.0.0"
   },
   "dependencies": {
+    "find-up": "^3.0.0",
+    "inquirer": "^6.0.0",
     "yargs": "^11.0.0"
   }
 }
