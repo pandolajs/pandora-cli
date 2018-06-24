@@ -16,29 +16,32 @@ const jsTemplate = `
 
 exports.command = 'js <filename> [author] [email] [desc]'
 
-exports.desc = 'js file'
+exports.desc = 'Create a js file.'
 
-exports.builder = {
-  // 文件名
-  filename: {
-    alias: 'f',
-    default: 'index.js'
-  },
-  // 作者
-  author: {
-    alias: 'a',
-    default: 'pandora-cli'
-  },
-  // email
-  email: {
-    alias: 'e',
-    default: ''
-  },
-  // 文件描述
-  desc: {
-    alias: 'd',
-    default: 'create by pandora-cli'
-  }
+exports.builder = yargs => {
+  return yargs.options({
+    // 文件名
+    filename: {
+      alias: 'f',
+      default: 'index',
+      demandOption: true
+    },
+    // 作者
+    author: {
+      alias: 'a',
+      default: 'pandora-cli'
+    },
+    // email
+    email: {
+      alias: 'e',
+      default: ''
+    },
+    // 文件描述
+    desc: {
+      alias: 'd',
+      default: 'create by pandora-cli'
+    }
+  })
 }
 
 exports.handler = async (argvs) => {
