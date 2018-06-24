@@ -19,5 +19,12 @@
   "bugs": {
     "url": "https://github.com/pandolajs/pandora-cli/issues"
   },
-  "homepage": "https://github.com/pandolajs/pandora-cli#readme"
+  "homepage": "https://github.com/pandolajs/pandora-cli#readme",
+  "devDependencies": {
+    "eslint": "^5.0.0",
+    "eslint-config-pandola": "^2.0.0"
+  },
+  "dependencies": {
+    "yargs": "^11.0.0"
+  }
 }
