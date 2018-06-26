@@ -6,6 +6,10 @@
 
 const chalk = require('chalk')
 require('console.table')
+const gitConfig = require('gitconfig')
+const fs = require('fs')
+const path = require('path')
+const deepExtend = require('deep-extend')
 
 function log (message = '', type, timestamp = true) {
   const date = new Date()
@@ -42,6 +46,45 @@ log.table = (list) => {
   console.table(list)
 }
 
+// 获取配置
+function getConfig (configPath) {
+  try {
+    fs.accessSync(configPath, fs.constants.F_OK | fs.constants.W_OK)
+  } catch(error) {
+    return {}
+  }
+  return require(configPath)
+}
+
 module.exports = {
-  log
+  log,
+  getGitUser () {
+    return gitConfig.get({
+      location: 'global'
+    }).then(({ user = {} } = {}) => {
+      return user
+    })
+  },
+  getConfig,
+  // 保存配置
+  saveConfig (config, configPath) {
+    let originalConfig = getConfig(configPath)
+    config = deepExtend(originalConfig, config)
+    const stream = fs.createWriteStream(configPath)
+    stream.end(JSON.stringify(config, null, '  '))
+  },
+  // 创建文件夹
+  mkdir (dirPath) {
+    if (!dirPath) {
+      return
+    }
+    fs.mkdirSync(dirPath)
+  },
+  // 绘制字节码
+  renderAscii() {
+    const ascii = fs.readFileSync(path.resolve(__dirname, '../resource/ascii-pandolajs.txt'))
+    log('', null, false)
+    log(ascii, 'green', false)
+    log('', null, false)
+  }
 }

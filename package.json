@@ -34,6 +34,7 @@
     "chalk": "^2.4.1",
     "console.table": "^0.10.0",
     "crimson-progressbar": "^1.2.0",
+    "deep-extend": "^0.6.0",
     "find-up": "^3.0.0",
     "gitconfig": "^2.0.4",
     "got": "^8.3.1",

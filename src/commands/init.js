@@ -6,7 +6,14 @@
 
 const Inquire = require('inquirer')
 const getList = require('../utils/get-list')
-const { log } = require('../utils')
+const path = require('path')
+const fs = require('fs')
+const pkg = require('package-json')
+const got = require('got')
+const tar = require('tar')
+const showProgress = require('crimson-progressbar')
+const { DEFAULT_NAME } = require('../utils/constants')
+const { log, getConfig, getGitUser, saveConfig, mkdir, renderAscii } = require('../utils')
 
 exports.command = 'init'
 
@@ -30,7 +37,18 @@ exports.builder = {
 }
 
 exports.handler = async argvs => {
-  const { boilerplate, _: [cmd, name], author, email, config } = argvs
+  let { boilerplate, _: [cmd, name], author, email, config } = argvs
+  const cwd = process.cwd()
+
+  if (!author || !email) {
+    let { user = {} } = await getConfig(config)
+    if (!user.name || !user.email) {
+      user = await getGitUser()
+    }
+    author = user.name
+    email = user.email
+  }
+
   const prompts = []
   // 项目名输入
   !name && prompts.push({
@@ -46,10 +64,10 @@ exports.handler = async argvs => {
   })
 
   // 选择模板
+  const list = await getList().catch(({ message = 'Get boilerplates failed.' }) => {
+    log.error(message)
+  })
   if (!boilerplate) {
-    const list = await getList().catch(({ message = 'Get boilerplates failed.' }) => {
-      log.error(message)
-    })
     const choices = list.map(item => {
       const { name } = item
       return name
@@ -79,11 +97,81 @@ exports.handler = async argvs => {
     default: ''
   })
 
+  // 非空文件夹提问
+  prompts.push({
+    type: 'confirm',
+    name: 'overWrite',
+    message: `The project directory is not empty, would you want to overwrite it?`,
+    default: true,
+    when (anwsers) {
+      const boil = anwsers.name || name
+      const prodir = `${path.join(cwd, boil)}/`
+      const exist = fs.existsSync(prodir)
+      if (exist) {
+        const files = fs.readdirSync(prodir)
+        return files.length > 0
+      } else {
+        return false
+      }
+    }
+  })
+
   // 最终处理
   Inquire.prompt(prompts).then(anwsers => {
     const finalAnwsers = Object.assign({}, {
       boilerplate, name, author, email
     }, anwsers)
-    console.log('anwsers:', finalAnwsers)
+    
+    const { overWrite, name: projectName, boilerplate: boil, author: userName, email: userEmail } = finalAnwsers
+    const curBoil = list.filter(item => {
+      return item.name === boil
+    })
+
+    // 如果输入的脚手架名称不对，退出命令行
+    if (curBoil.length <= 0) {
+      log.error(`Invalid boilerplate '${boilerplate}'`)
+      renderAscii()
+      return false
+    }
+
+    const proPath = path.join(cwd, projectName)
+    if (overWrite === false) {
+      log('Thanks ~~~')
+      renderAscii()
+      return false
+    } else if (overWrite === undefined) {
+      mkdir(proPath)
+    }
+
+    const configObj = {
+      boilerplate: {
+        name: boil,
+        version: curBoil[0].version
+      },
+      user: {
+        name: userName,
+        email: userEmail
+      }
+    }
+    saveConfig(configObj, path.join(proPath, DEFAULT_NAME))
+
+    // 下载脚手架
+    pkg(boil).then(async metadata => {
+      const { dist: { tarball } } = metadata
+      log(`Starting download ${tarball}`)
+      const stream = await got.stream(tarball)
+        .on('downloadProgress', ({ percent }) => {
+          showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)
+        })
+      
+      stream.pipe(tar.x({
+        strip: 1,
+        C: proPath
+      })).on('close', () => {
+        log('', null, false)
+        log('Project finish init. Enjoy youself!')
+        renderAscii()
+      })
+    })
   })
 }
