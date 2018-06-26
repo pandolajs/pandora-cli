@@ -1,9 +1,13 @@
 #!/usr/bin/env node
  
+const defaultConfName = '.pandora.conf.json'
 const commander = require('../src/index')
 const findUp = require('find-up')
 
-const cwd = process.cwd()
-console.log('cwd:', cwd)
+const confPath = findUp.sync(defaultConfName)
+const config = {}
+if (confPath) {
+  config.config = confPath
+}
 
-commander({})
+commander(config)

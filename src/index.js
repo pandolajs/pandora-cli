@@ -6,12 +6,21 @@
 
 
 const yargs = require('yargs')
-const Inquire = require('inquirer')
+const { DEFAULT_CONF } = require('./utils/constants')
 
-module.exports = (config) => {
-  yargs.command('$0', 'Welcome to pandora-cli.', yargs => {
-    yargs.commandDir('./commands')
-  }, args => {
-    console.log('pa exec.')
-  }).argv
+module.exports = (options) => {
+  const config = Object.assign({}, {
+    config: DEFAULT_CONF
+  }, options)
+  yargs.config(config)
+    .option('config', {
+      alias: 'c',
+      describe: 'The configuration file path',
+      default: config.config
+    })
+    .command('$0', 'Welcome to pandora-cli.', yargs => {
+      yargs.commandDir('./commands')
+    }, argvs => {
+      console.log('pa exec.', argvs)
+    }).argv
 }
