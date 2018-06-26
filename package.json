@@ -8,7 +8,9 @@
   },
   "bin": {
     "pandola": "./bin/cli.js",
-    "pa": "./bin/cli.js"
+    "pa": "./bin/cli.js",
+    "pia": "./bin/cli.js",
+    "papapa": "./bin/cli.js"
   },
   "repository": {
     "type": "git",
@@ -29,8 +31,16 @@
     "eslint-config-pandola": "^2.0.0"
   },
   "dependencies": {
+    "chalk": "^2.4.1",
+    "console.table": "^0.10.0",
+    "crimson-progressbar": "^1.2.0",
     "find-up": "^3.0.0",
+    "gitconfig": "^2.0.4",
+    "got": "^8.3.1",
     "inquirer": "^6.0.0",
+    "node-fetch": "^2.1.2",
+    "package-json": "^5.0.0",
+    "tar": "^4.4.4",
     "yargs": "^11.0.0"
   }
 }

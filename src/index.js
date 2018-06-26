@@ -8,8 +8,10 @@
 const yargs = require('yargs')
 const Inquire = require('inquirer')
 
-yargs.command('$0', 'Welcome to pandora-cli.', yargs => {
-  yargs.commandDir('./commands')
-}, args => {
-  console.log('pa exec.')
-}).argv
+module.exports = (config) => {
+  yargs.command('$0', 'Welcome to pandora-cli.', yargs => {
+    yargs.commandDir('./commands')
+  }, args => {
+    console.log('pa exec.')
+  }).argv
+}

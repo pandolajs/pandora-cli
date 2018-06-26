@@ -4,7 +4,7 @@
  * @version 1.0.0 | 2018-06-24 | sizhao       // 初始版本
 */
 
-exports.command = 'create <command>'
+exports.command = 'create'
 
 exports.desc = 'Create a component or a file though a boilerplate.'
 
