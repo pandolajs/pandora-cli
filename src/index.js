@@ -20,7 +20,7 @@ module.exports = (options) => {
     })
     .command('$0', 'Welcome to pandora-cli.', yargs => {
       yargs.commandDir('./commands')
-    }, argvs => {
-      console.log('pa exec.', argvs)
+    }, () => {
+      yargs.showHelp()
     }).argv
 }

@@ -6,8 +6,16 @@
 
 const path = require('path')
 
-const DEFAULT_NAME = '.padora.conf.json'
+const DEFAULT_NAME = '.pandora.conf.json'
+
 module.exports = {
   DEFAULT_NAME,
-  DEFAULT_CONF: path.join(process.cwd(), DEFAULT_NAME)
+  DEFAULT_CONF: path.join(process.cwd(), DEFAULT_NAME),
+  DEFAULT_ENV: 'dev',
+  ENV: {
+    dev: 'development',
+    test: 'test',
+    pre: 'preproduction',
+    prod: 'production'
+  },
 }

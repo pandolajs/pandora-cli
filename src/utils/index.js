@@ -26,7 +26,7 @@ log.success = (message) => {
 
 log.error = (message, error) => {
   log(message, 'red')
-  console.error(error)
+  error && console.error(error)
 }
 
 log.table = (list) => {
@@ -81,10 +81,19 @@ module.exports = {
     fs.mkdirSync(dirPath)
   },
   // 绘制字节码
-  renderAscii() {
+  renderAscii () {
     const ascii = fs.readFileSync(path.resolve(__dirname, '../resource/ascii-pandolajs.txt'))
     log('', null, false)
     log(ascii, 'green', false)
     log('', null, false)
+  },
+  // 获取 cwd
+  getCwd (configPath) {
+    const confdir = path.dirname(configPath)
+    let { cwd } = getConfig(configPath)
+    if (cwd === undefined) {
+      cwd = confdir
+    }
+    return /^\./.test(cwd) ? path.resolve(confdir, cwd) : cwd
   }
 }
