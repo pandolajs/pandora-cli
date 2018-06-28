@@ -7,6 +7,8 @@
 const path = require('path')
 
 const DEFAULT_NAME = '.pandora.conf.json'
+const HOOK_DIR = '.pandora'
+const CACHE_DIR = '.pandora/.cache'
 
 module.exports = {
   DEFAULT_NAME,
@@ -18,4 +20,6 @@ module.exports = {
     pre: 'preproduction',
     prod: 'production'
   },
+  HOOK_DIR,
+  CACHE_DIR
 }

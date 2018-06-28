@@ -6,10 +6,11 @@
 
 const Inquirer = require('inquirer')
 const { currentDate, getConfig, getGitUser, renderAscii, log, getCwd, template } = require('../utils')
+const { HOOK_DIR } = require('../utils/constants')
 const path = require('path')
 const fs = require('fs')
 
-const suffix = '.pandora/templates'
+const suffix = `${HOOK_DIR}/templates`
 const buildInSuffix = '../resource/templates'
 
 exports.command = 'create'
