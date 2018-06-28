@@ -69,7 +69,7 @@ exports.handler = argvs => {
   const { boilerplate: { name } = {} } = getConfig(config)
 
   if (name !== boilName) {
-    log.error(`The ${cmd} command is only work in ${boilName} project.`)
+    log.error(`The ${cmd} command only work in ${boilName} project.`)
     return renderAscii()
   }
 
