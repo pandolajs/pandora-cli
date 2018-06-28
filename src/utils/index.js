@@ -56,6 +56,12 @@ function getConfig (configPath) {
   return require(configPath)
 }
 
+// 生成日期
+function currentDate () {
+  const date = new Date()
+  return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}:${`${date.getDate()}`.padStart(2, '0')}`
+}
+
 module.exports = {
   log,
   getGitUser () {
@@ -95,5 +101,11 @@ module.exports = {
       cwd = confdir
     }
     return /^\./.test(cwd) ? path.resolve(confdir, cwd) : cwd
+  },
+  currentDate,
+  template (content = '', inject) {
+    return content.replace(/@{([^}]+)}/ig, (m, key) => {
+      return inject[key.trim()]
+    })
   }
 }
