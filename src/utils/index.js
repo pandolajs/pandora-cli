@@ -107,5 +107,19 @@ module.exports = {
     return content.replace(/@{([^}]+)}/ig, (m, key) => {
       return inject[key.trim()]
     })
+  },
+  // 创建多级目录
+  mkdirs (dirs, cwd) {
+    const reg = new RegExp(`^(?:${cwd})\\/`)
+    if (!reg.test(dirs)) {
+      throw new Error('mkdirs fails...')
+    }
+    const splits = dirs.replace(reg, '').split('\/')
+    let goon = cwd
+    !fs.existsSync(goon) && fs.mkdirSync(goon)
+    splits.forEach(chunk => {
+      goon = path.join(goon, chunk)
+      !fs.existsSync(goon) && fs.mkdirSync(goon)
+    })
   }
 }
