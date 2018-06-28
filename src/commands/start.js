@@ -27,7 +27,7 @@ exports.handler = argvs => {
   log('Start building ...')
   const { config, env } = argvs
   const cwd = getCwd(config)
-  const buildScript = path.join(cwd, 'scripts/build.js')
+  const buildScript = path.join(cwd, '.pandora/scripts/build.js')
   const scriptExit = fs.existsSync(buildScript)
   if (!scriptExit) {
     log.error('There is no build scripts exist.')
