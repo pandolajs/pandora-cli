@@ -168,6 +168,9 @@ exports.handler = async argvs => {
         strip: 1,
         C: proPath
       })).on('close', () => {
+        fs.createWriteStream(path.join(proPath, '.gitignore'))
+          .end(`.DS_Store\n.idea\nbuild\ncoverage\nnode_modules\nnpm-debug.log\nyarn-error.log\n.vscode\nyarn.lock\ndist`)
+        log('', null, false)
         log('', null, false)
         log('Project finish init. Enjoy youself!')
         renderAscii()
