@@ -4,6 +4,8 @@
 
 这是一款能提升程序员幸福感的 CLI 工具！！！
 
+啪（pa）一下，你就可以完成你的项目搭建编译 ~~
+
 罗老师附体：
 
 > 我们重新定义了 CLI.
@@ -17,6 +19,23 @@
 `pandora-cli` 旨在统一的开发入口，在开发过程中不用在使用各种各样的工具，比如：项目初始化时，用 yo, 构建时使用 webpack-cli gulp 等等，发布时使用有使用自定义的脚本等等。
 
 聪明的你可能早就想到，都注册为 npm scripts 不就好了么？没错，但是项目初始化你还是需要使用其他的 cli 工具的，如果你能接受这一点，你可能并不需要使用 `pandora-cli`. 但 `pandora-cli` 能做的却绝不仅仅是集成了项目初始化的脚本。
+
+## 使用 
+
+全局安装：
+```
+  npm i -g pandora-cli
+
+  pa init project
+```
+
+或者，本地安装：
+
+```
+  npm i -D pandora-cli
+
+  npx pa init project
+```
 
 ## PANDORA-CLI 能做什么？
 
@@ -131,6 +150,12 @@ module.exports = argv => {
 - [ ] 升级 command hook 机制，支持 before-cmd post-cmd 脚本
 
 - [ ] pandolajs 静态站点建设
+
+## 彩蛋
+
+使用 `pa` 一下觉得没意思？那 `pia` 一下呢？ 那 `papapa` 呢 ~~~ 总有一款姿势满足您的口味 ~~
+
+> 自己写个工具，还不让我自娱一下？
 
 ## 贡献
 
