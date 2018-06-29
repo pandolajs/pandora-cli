@@ -1,0 +1,49 @@
+{
+  "name": "pandora-cli",
+  "version": "0.4.5",
+  "description": "pandora cli",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "pandola": "./bin/cli.js",
+    "pa": "./bin/cli.js",
+    "pia": "./bin/cli.js",
+    "papapa": "./bin/cli.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pandolajs/pandora-cli.git"
+  },
+  "keywords": [
+    "pandorajs",
+    "cli"
+  ],
+  "author": "JohnHou",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pandolajs/pandora-cli/issues"
+  },
+  "homepage": "https://github.com/pandolajs/pandora-cli#readme",
+  "devDependencies": {
+    "eslint": "^5.0.0",
+    "eslint-config-pandola": "^2.0.0"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "console.table": "^0.10.0",
+    "crimson-progressbar": "^1.2.0",
+    "deep-extend": "^0.6.0",
+    "del": "^3.0.0",
+    "find-up": "^3.0.0",
+    "gitconfig": "^2.0.4",
+    "got": "^8.3.1",
+    "inquirer": "^6.0.0",
+    "node-fetch": "^2.1.2",
+    "ora": "^2.1.0",
+    "package-json": "^5.0.0",
+    "tar": "^4.4.4",
+    "yargs": "^11.0.0"
+  }
+}
