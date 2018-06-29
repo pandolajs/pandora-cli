@@ -116,7 +116,7 @@ exports.handler = argvs => {
 
   pkg(componentRegisty, { fullMetadata: true }).then(async metadata => {
     const { dist: { tarball }, main, version } = metadata
-    log(`Starting download ${tarball}`)
+    log(`Start downloading ${tarball}`)
     const stream = await got.stream(tarball)
       .on('downloadProgress', ({ percent }) => {
         showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)

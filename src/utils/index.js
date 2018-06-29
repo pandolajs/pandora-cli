@@ -29,6 +29,10 @@ log.error = (message, error) => {
   error && console.error(error)
 }
 
+log.info = (message) => {
+  log(message, 'yellow')
+}
+
 log.table = (list) => {
   list = list.map(item => {
     let firstKey = true
@@ -121,5 +125,19 @@ module.exports = {
       goon = path.join(goon, chunk)
       !fs.existsSync(goon) && fs.mkdirSync(goon)
     })
+  },
+  // 版本比较
+  versionCompare (v1, v2) {
+    const curVer = v1.split('.')
+    const specVer = v2.split('.')
+  
+    for(let i = 0, len = curVer.length; i < len; i ++){
+      if(curVer[i] !== specVer[i]){
+        return curVer[i] - specVer[i] > 0 ? true : false
+      }
+      if(i >= len - 1){
+        return false
+      }
+    }
   }
 }
