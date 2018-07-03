@@ -33,6 +33,10 @@ log.info = (message) => {
   log(message, 'yellow')
 }
 
+log.line = (num = 1) => {
+  console.log(' '.padEnd(num, '\n'))
+}
+
 log.table = (list) => {
   list = list.map(item => {
     let firstKey = true

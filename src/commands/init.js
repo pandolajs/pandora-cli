@@ -11,6 +11,7 @@ const fs = require('fs')
 const pkg = require('package-json')
 const got = require('got')
 const tar = require('tar')
+const npmi = require('npmi')
 const showProgress = require('crimson-progressbar')
 const { DEFAULT_NAME } = require('../utils/constants')
 const { log, getConfig, getGitUser, saveConfig, mkdir, renderAscii } = require('../utils')
@@ -168,12 +169,25 @@ exports.handler = async argvs => {
         strip: 1,
         C: proPath
       })).on('close', () => {
-        fs.createWriteStream(path.join(proPath, '.gitignore'))
-          .end(`.DS_Store\n.idea\nbuild\ncoverage\nnode_modules\nnpm-debug.log\nyarn-error.log\n.vscode\nyarn.lock\ndist`)
-        log('', null, false)
-        log('', null, false)
-        log('Project finish init. Enjoy youself!')
-        renderAscii()
+        const ignoreStream = fs.createWriteStream(path.join(proPath, '.gitignore'))
+        log.line(2)
+        log.info('Start install npm packages ...')
+        ignoreStream.on('close', () => {
+          npmi({
+            path: proPath,
+            localInstall: true
+          }, (error, result) => {
+            if (error) {
+              return console.error(error)
+            }
+            log.success(`Successed install ${result.length} npm packages.`)
+            log('', null, false)
+            log('', null, false)
+            log('Project finish init. Enjoy youself!')
+            renderAscii()
+          })
+        })
+        ignoreStream.end(`.DS_Store\n.idea\nbuild\ncoverage\nnode_modules\nnpm-debug.log\nyarn-error.log\n.vscode\nyarn.lock\ndist`)
       })
     })
   })
