@@ -20,6 +20,12 @@
 
 聪明的你可能早就想到，都注册为 npm scripts 不就好了么？没错，但是项目初始化你还是需要使用其他的 cli 工具的，如果你能接受这一点，你可能并不需要使用 `pandora-cli`. 但 `pandora-cli` 能做的却绝不仅仅是集成了项目初始化的脚本。
 
+## Table of contents
+
+- [如何使用 pandora-cli 来开发微信小程序](./docs/how-to-develop-minprogram-with-pandora.md)
+
+- [如何开发为 pandora-cli 开发一个项目脚手架](./docs/how-to-develop-a-boilerplate-for-pandora.md)
+
 ## 使用 
 
 全局安装：
