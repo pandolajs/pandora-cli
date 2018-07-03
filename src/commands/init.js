@@ -13,8 +13,9 @@ const got = require('got')
 const tar = require('tar')
 const npmi = require('npmi')
 const showProgress = require('crimson-progressbar')
+const deepExtend = require('deep-extend')
 const { DEFAULT_NAME } = require('../utils/constants')
-const { log, getConfig, getGitUser, saveConfig, mkdir, renderAscii } = require('../utils')
+const { log, getConfig, getGitUser, saveConfig, mkdir, renderAscii, template, readFiles, currentDate } = require('../utils')
 
 exports.command = 'init'
 
@@ -35,6 +36,19 @@ exports.builder = {
     describe: 'Input the user email.',
     default: ''
   }
+}
+
+function initProject (proPath, inject) {
+  const pkgPath = path.join(proPath, 'package.json')
+  const pkgObj = require(pkgPath)
+  fs.createWriteStream(pkgPath).end(JSON.stringify(deepExtend({}, pkgObj, {
+    name: inject.ProjectName,
+    version: '1.0.0',
+    private: true
+  }), null, '  '))
+  readFiles(proPath, ({ path, content }) => {
+    fs.createWriteStream(path).end(/\/\.pandora\//.test(path) ? content : template(content, inject) )
+  })
 }
 
 exports.handler = async argvs => {
@@ -82,6 +96,23 @@ exports.handler = async argvs => {
     })
   }
 
+  // 如果选择的 boilerplate 是微信小程序，则输入 appId
+  prompts.push({
+    type: 'input',
+    name: 'appId',
+    message: 'Please enter a appId:',
+    validate (input) {
+      if (!input) {
+        return 'You must enter a valid miniprogram appId.'
+      }
+      return true
+    },
+    when (anwsers) {
+      const { boilerplate = '' } = anwsers
+      return /pandora-boilerplate-wechat/i.test(boilerplate)
+    }
+  })
+
   // 输入用户名
   !author && prompts.push({
     type: 'input',
@@ -123,7 +154,7 @@ exports.handler = async argvs => {
       boilerplate, name, author, email
     }, anwsers)
     
-    const { overWrite, name: projectName, boilerplate: boil, author: userName, email: userEmail } = finalAnwsers
+    const { overWrite, name: projectName, boilerplate: boil, author: userName, email: userEmail, appId } = finalAnwsers
     const curBoil = list.filter(item => {
       return item.name === boil
     })
@@ -173,6 +204,13 @@ exports.handler = async argvs => {
         log.line(2)
         log.info('Start install npm packages ...')
         ignoreStream.on('close', () => {
+          initProject(proPath, {
+            AppId: appId,
+            ProjectName: path.basename(proPath),
+            User: userName,
+            Email: userEmail,
+            Date: currentDate()
+          })
           npmi({
             path: proPath,
             localInstall: true
@@ -183,7 +221,7 @@ exports.handler = async argvs => {
             log.success(`Successed install ${result.length} npm packages.`)
             log('', null, false)
             log('', null, false)
-            log('Project finish init. Enjoy youself!')
+            log.success('Project finish init. Enjoy youself!')
             renderAscii()
           })
         })

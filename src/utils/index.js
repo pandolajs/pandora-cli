@@ -70,6 +70,24 @@ function currentDate () {
   return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}:${`${date.getDate()}`.padStart(2, '0')}`
 }
 
+// 递归读文件
+function readFiles (dir, done) {
+  if (!fs.existsSync(dir)) {
+    throw new Error(`The file ${dir} does not exist.`)
+  }
+  const stat = fs.statSync(dir)
+  if (stat.isFile()) {
+    done({
+      path: dir,
+      content: fs.readFileSync(dir, {encoding: 'utf8'})
+    })
+  } else {
+    fs.readdirSync(dir).forEach(file => {
+      readFiles(path.join(dir, file), done)
+    })
+  }
+}
+
 module.exports = {
   log,
   getGitUser () {
@@ -143,5 +161,7 @@ module.exports = {
         return false
       }
     }
-  }
+  },
+  // 递归读取文件
+  readFiles
 }
