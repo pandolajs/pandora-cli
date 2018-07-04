@@ -110,10 +110,12 @@ pandora-cli 的目的是统一开发入口，提升程序员们的幸福指数�
 
 在样板代码中可以使用如下全局变量：
 
-@{Description} 使用命令时输入的文件描述
-@{User} 系统中 git global 中的 user.name, 如果没有设置就是命令行中提示输入的名字，或者项目根目录中 .pandora-conf.json 的配置的
-@{Email} 系统中 git global 中的 user.name, 如果没有设置就是命令行中提示输入的名字，或者项目根目录中 .pandora-conf.json 的配置的
-@{Date} 系统当前的日期
+```
+  @{Description} 使用命令时输入的文件描述
+  @{User} 系统中 git global 中的 user.name, 如果没有设置就是命令行中提示输入的名字，或者项目根目录中 .pandora-conf.json 的配置的
+  @{Email} 系统中 git global 中的 user.name, 如果没有设置就是命令行中提示输入的名字，或者项目根目录中 .pandora-conf.json 的配置的
+  @{Date} 系统当前的日期
+```
 
 ### 使用我们准备好的组件库
 
