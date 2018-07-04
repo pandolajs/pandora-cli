@@ -194,3 +194,19 @@ production:
   env: 'preproduction'
 }
 ```
+
+### 如何使用字体图标？
+
+在项目根目录下 `icons`, 将图标的 svg （可以是设计师提供，也可以从 icon-font 下载）置于其中，构建时自动完成，svg 命名格式：
+
+`orderno-iconname.svg` 比如： `5-wechat.svg`
+
+orderno 是用来保证每个图标的 unicode 码是不变的，保证在不通过类名来使用字体图标不会由于新增字体图标导致图标的 unicode 码改变。
+
+在页面中可以通过如下形式来使用
+
+```
+  <view class="icon-font icon-font_wechat"></view>
+```
+
+> 其中 `icon-font` 是用来声明 font-family 的， `icon-font_wechat` 就是具体的字体图标，其中 `icon-font_` 是前缀，作为字体图标的命名空间，`wechat` 与 SVG 的 iconname 一致。
