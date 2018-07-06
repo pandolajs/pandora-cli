@@ -10,6 +10,7 @@ const gitConfig = require('gitconfig')
 const fs = require('fs')
 const path = require('path')
 const deepExtend = require('deep-extend')
+const globby = require('globby')
 
 function log (message = '', type, timestamp = true) {
   const date = new Date()
@@ -71,21 +72,28 @@ function currentDate () {
 }
 
 // 递归读文件
-function readFiles (dir, done) {
+function readFiles (dir, options, done) {
   if (!fs.existsSync(dir)) {
     throw new Error(`The file ${dir} does not exist.`)
   }
-  const stat = fs.statSync(dir)
-  if (stat.isFile()) {
-    done({
-      path: dir,
-      content: fs.readFileSync(dir, {encoding: 'utf8'})
-    })
-  } else {
-    fs.readdirSync(dir).forEach(file => {
-      readFiles(path.join(dir, file), done)
-    })
+  if (typeof options === 'function') {
+    done = options
+    options = {}
   }
+  options = Object.assign({}, {
+    cwd: dir,
+    dot: true,
+    absolute: true,
+    onlyFiles: true
+  }, options)
+
+  const files = globby.sync('**/**', options)
+  files.forEach(file => {
+    done({
+      path: file,
+      content: fs.readFileSync(file, {encoding: 'utf8'})
+    })
+  })
 }
 
 module.exports = {

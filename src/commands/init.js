@@ -46,8 +46,8 @@ function initProject (proPath, inject) {
     version: '1.0.0',
     private: true
   }), null, '  '))
-  readFiles(proPath, ({ path, content }) => {
-    fs.createWriteStream(path).end(/\/\.pandora\//.test(path) ? content : template(content, inject) )
+  readFiles(proPath, {ignore: ['.{pandora,git,idea,vscode,DS_Store}/**/*']}, ({ path, content }) => {
+    fs.createWriteStream(path).end(template(content, inject))
   })
 }
 
