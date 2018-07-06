@@ -84,16 +84,12 @@ function readFiles (dir, options, done) {
     cwd: dir,
     dot: true,
     absolute: true,
-    onlyFiles: true,
-    gitignore: true
+    onlyFiles: true
   }, options)
-
-  const { gitignore } = options
-  delete options.gitignore
 
   const files = globby.sync('**/**', options)
   files.forEach(file => {
-    gitignore && !globby.gitignore.sync(file) && done({
+    done({
       path: file,
       content: fs.readFileSync(file, {encoding: 'utf8'})
     })
