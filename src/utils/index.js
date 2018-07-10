@@ -11,6 +11,7 @@ const fs = require('fs')
 const path = require('path')
 const deepExtend = require('deep-extend')
 const globby = require('globby')
+const { HOOK_DIR } = require('./constants')
 
 function log (message = '', type, timestamp = true) {
   const date = new Date()
@@ -96,6 +97,24 @@ function readFiles (dir, options, done) {
   })
 }
 
+// 获取项目的 cwd, 支持手动配置
+function getCwd (configPath) {
+  const confdir = path.dirname(configPath)
+  let { cwd } = getConfig(configPath)
+  if (cwd === undefined) {
+    cwd = confdir
+  }
+  return /^\./.test(cwd) ? path.resolve(confdir, cwd) : cwd
+}
+
+// 渲染二进制图
+function renderAscii () {
+  const ascii = fs.readFileSync(path.resolve(__dirname, '../resource/ascii-pandolajs.txt'))
+  log('', null, false)
+  log(ascii, 'green', false)
+  log('', null, false)
+}
+
 module.exports = {
   log,
   getGitUser () {
@@ -121,21 +140,9 @@ module.exports = {
     fs.mkdirSync(dirPath)
   },
   // 绘制字节码
-  renderAscii () {
-    const ascii = fs.readFileSync(path.resolve(__dirname, '../resource/ascii-pandolajs.txt'))
-    log('', null, false)
-    log(ascii, 'green', false)
-    log('', null, false)
-  },
+  renderAscii,
   // 获取 cwd
-  getCwd (configPath) {
-    const confdir = path.dirname(configPath)
-    let { cwd } = getConfig(configPath)
-    if (cwd === undefined) {
-      cwd = confdir
-    }
-    return /^\./.test(cwd) ? path.resolve(confdir, cwd) : cwd
-  },
+  getCwd,
   currentDate,
   template (content = '', inject) {
     return content.replace(/@{([^}]+)}/ig, (m, key) => {
@@ -171,5 +178,35 @@ module.exports = {
     }
   },
   // 递归读取文件
-  readFiles
+  readFiles,
+  // 加载命令
+  loadCmd ({ cmds = [], argvs = {} }, config) {
+    if (!config) {
+      return log.error('Invalid config path.')
+    }
+    if (cmds.length <= 0) {
+      return log.error('Invalid cmd.')
+    }
+    const cwd = getCwd(config)
+    const scriptPath = path.join(cwd, `${HOOK_DIR}/scripts/${cmds[0]}.js`)
+    
+    if (!fs.existsSync(scriptPath)) {
+      log.error(`There is no ${cmds[0]} scripts exist.`)
+      log.info(`You maybe foget to create a ${cmds[0]}.js in directory ${path.join(cwd, 'scripts/')}.`)
+      return renderAscii()
+    }
+
+    const script = require(scriptPath)
+    if (typeof script !== 'function') {
+      log.error(`Invalid ${cmds[0]} script, expect to export a function.`)
+      return renderAscii()
+    }
+
+    const result = script({
+      cmds,
+      argvs
+    })
+
+    result && log(result)
+  }
 }

@@ -211,7 +211,8 @@ exports.handler = async argvs => {
             Email: userEmail,
             Date: currentDate()
           })
-          npmi({
+
+          fs.existsSync(path.join(proPath, 'package.json')) && npmi({
             path: proPath,
             localInstall: true
           }, (error, result) => {
