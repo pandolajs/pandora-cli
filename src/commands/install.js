@@ -2,9 +2,13 @@
  * @fileOverview pandora-cli install command
  * @author sizhao | 870301137@qq.com
  * @version 1.0.0 | 2018-06-27 | sizhao       // 初始版本
+ * @version 1.1.0 | 2018-07-10 | sizhao       // pa i --npm 来安装 npm 包，或者非小程序项目中默认安装 npm 包
+ *                                            // 支持通过配置制定小程序的组件库包
  * @description 
- * 1. 该命令只针对微信小程序项目有效，用来安装微信自定义组件
- * 2. 其他类型项目将不做任何处理
+ * 1. 在小程序项目中，pa install component 默认将安装官方维护的组件库中对应的组件
+ * 2. 支持通过配置制定额外的小程序组件库，优先从配置的组件库中下载组件
+ * 3. 通过 --npm 可以在小程序项目中通过 pa install 来安装 npm 包
+ * 4. 非小程序项目中 pa install 默认安装 npm 包
 */
 
 const { log, getConfig, getCwd, renderAscii, mkdirs } = require('../utils')
@@ -34,8 +38,12 @@ exports.builder = yargs => {
       alias: 'n',
       describe: 'Install the component with no cache.',
       default: false
+    },
+    npm: {
+      describe: 'Force install component from npm registy,',
+      default: false
     }
-  }).boolean('nocache').argv
+  }).boolean(['nocache', 'npm']).argv
 } 
 
 const boilName = '@pandolajs/pandora-boilerplate-wechat'
@@ -65,10 +73,10 @@ function copyComponent(from, to, version, cwd) {
 }
 
 exports.handler = argvs => {
-  const { _: [cmd, component], config, nocache, dest } = argvs
+  const { _: [cmd, component], config, nocache, dest, npm } = argvs
   const { boilerplate: { name } = {} } = getConfig(config)
 
-  if (name !== boilName) {
+  if (name !== boilName || npm ) {
     log.error(`The ${cmd} command only work in ${boilName} project.`)
     return renderAscii()
   }
@@ -116,6 +124,7 @@ exports.handler = argvs => {
 
   pkg(componentRegisty, { fullMetadata: true }).then(async metadata => {
     const { dist: { tarball }, main, version } = metadata
+    console.log('pkg:', tarball, main, version)
     log(`Start downloading ${tarball}`)
     const stream = await got.stream(tarball)
       .on('downloadProgress', ({ percent }) => {

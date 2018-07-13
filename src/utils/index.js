@@ -12,6 +12,7 @@ const path = require('path')
 const deepExtend = require('deep-extend')
 const globby = require('globby')
 const { HOOK_DIR } = require('./constants')
+const Inquirer = require('inquirer')
 
 function log (message = '', type, timestamp = true) {
   const date = new Date()
@@ -115,6 +116,14 @@ function renderAscii () {
   log('', null, false)
 }
 
+// 保存配置
+function saveConfig (config, configPath) {
+  let originalConfig = getConfig(configPath)
+  config = deepExtend(originalConfig, config)
+  const stream = fs.createWriteStream(configPath)
+  stream.end(JSON.stringify(config, null, '  '))
+}
+
 module.exports = {
   log,
   getGitUser () {
@@ -126,12 +135,7 @@ module.exports = {
   },
   getConfig,
   // 保存配置
-  saveConfig (config, configPath) {
-    let originalConfig = getConfig(configPath)
-    config = deepExtend(originalConfig, config)
-    const stream = fs.createWriteStream(configPath)
-    stream.end(JSON.stringify(config, null, '  '))
-  },
+  saveConfig,
   // 创建文件夹
   mkdir (dirPath) {
     if (!dirPath) {
@@ -179,8 +183,8 @@ module.exports = {
   },
   // 递归读取文件
   readFiles,
-  // 加载命令
-  loadCmd ({ cmds = [], argvs = {} }, config) {
+  // 加载并执行命令
+  loadCmd ({ cmds = [], argvs = {} }, config, exec = false) {
     if (!config) {
       return log.error('Invalid config path.')
     }
@@ -196,17 +200,46 @@ module.exports = {
       return renderAscii()
     }
 
-    const script = require(scriptPath)
+    let script = require(scriptPath)
+    let prompts = []
+    if (typeof script === 'object') {
+      prompts = script.prompts || []
+      script = script.action
+    }
+
     if (typeof script !== 'function') {
       log.error(`Invalid ${cmds[0]} script, expect to export a function.`)
       return renderAscii()
     }
 
-    const result = script({
-      cmds,
-      argvs
-    })
+    function fn (params) {
+      let bindScript = script.bind({
+        getConfig: () => getConfig(config),
+        getCwd: () => getCwd(config),
+        saveConfig: conf => saveConfig(conf, config),
+        log,
+        renderAscii
+      })
+      const result = bindScript(params)
+      result && log(result)
+    }
 
-    result && log(result)
+    if (exec === true) {
+      if (prompts.length > 0) {
+        Inquirer.prompt(prompts).then(anwsers => {
+          fn({
+            cmds,
+            argvs: Object.assign(argvs, anwsers)
+          })
+        })
+      } else {
+        return fn({
+          cmds,
+          argvs
+        })
+      }
+    } else {
+      return script
+    }
   }
 }
