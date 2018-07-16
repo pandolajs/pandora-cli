@@ -4,10 +4,8 @@
  * @version 1.0.0 | 2018-06-26 | sizhao       // 初始版本
 */
 
-const path = require('path')
-const fs = require('fs')
-const { ENV, DEFAULT_ENV, HOOK_DIR } = require('../utils/constants') 
-const { getCwd, log, renderAscii } = require('../utils')  
+const { DEFAULT_ENV } = require('../utils/constants') 
+const { log, loadCmd } = require('../utils')  
 
 exports.command = 'start'
 
@@ -23,24 +21,11 @@ exports.builder = {
   }
 }
 
-exports.handler = argvs => {
+exports.handler = ({ _: cmds = [], ...argvs }) => {
   log('Start building ...')
-  const { config, env } = argvs
-  const cwd = getCwd(config)
-  const buildScript = path.join(cwd, `${HOOK_DIR}/scripts/build.js`)
-  const scriptExit = fs.existsSync(buildScript)
-  if (!scriptExit) {
-    log.error('There is no build scripts exist.')
-    log(`You maybe foget to create a build.js in directory ${path.join(cwd, 'scripts/')}.`)
-    renderAscii()
-    return false
-  }
-  const build = require(buildScript)
-  if (typeof build !== 'function') {
-    log.error('Invalid build script, expect to export a function.')
-    renderAscii()
-    return false
-  }
-  const result = build(ENV[env.toLowerCase()])
-  result && log(result)
+  loadCmd({
+    cmds,
+    argvs,
+    alias: ['build', 'start']
+  }, argvs.config, true)
 }

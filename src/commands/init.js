@@ -46,7 +46,7 @@ function initProject (proPath, inject) {
     version: '1.0.0',
     private: true
   }), null, '  '))
-  readFiles(proPath, {ignore: ['.{pandora,git,idea,vscode,DS_Store}/**/*', '{scripts,dist,node_modules}/**/*'], gitignore: true}, ({ path, content }) => {
+  readFiles(proPath, {ignore: ['.{pandora,git,idea,vscode,DS_Store}/**/*', '{scripts,dist,node_modules}/**/*', '**/*.{png,jpg,jpeg,gif,bmp,webp}'], gitignore: true}, ({ path, content }) => {
     fs.createWriteStream(path).end(template(content, inject))
   })
 }

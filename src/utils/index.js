@@ -184,7 +184,7 @@ module.exports = {
   // 递归读取文件
   readFiles,
   // 加载并执行命令
-  loadCmd ({ cmds = [], argvs = {} }, config, exec = false) {
+  loadCmd ({ cmds = [], argvs = {}, alias = [] }, config, exec = false) {
     if (!config) {
       return log.error('Invalid config path.')
     }
@@ -192,8 +192,11 @@ module.exports = {
       return log.error('Invalid cmd.')
     }
     const cwd = getCwd(config)
-    const scriptPath = path.join(cwd, `${HOOK_DIR}/scripts/${cmds[0]}.js`)
+    let scriptPath = path.join(cwd, `${HOOK_DIR}/scripts/${cmds[0]}.js`)
     
+    while (!fs.existsSync(scriptPath) && alias.length > 0) {
+      scriptPath = path.join(cwd, `${HOOK_DIR}/scripts/${alias.shift()}.js`)
+    }
     if (!fs.existsSync(scriptPath)) {
       log.error(`There is no ${cmds[0]} scripts exist.`)
       log.info(`You maybe foget to create a ${cmds[0]}.js in directory ${path.join(cwd, 'scripts/')}.`)
@@ -239,7 +242,7 @@ module.exports = {
         })
       }
     } else {
-      return script
+      return { action: script, prompts }
     }
   }
 }
