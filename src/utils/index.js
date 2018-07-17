@@ -124,6 +124,21 @@ function saveConfig (config, configPath) {
   stream.end(JSON.stringify(config, null, '  '))
 }
 
+// inject prompt
+function injectPrompt (prompts = [], injectData = {}) {
+  return prompts.map(prompt => {
+    ['message', 'default', 'choices', 'validate', 'filter', 'when'].forEach(key => {
+      const orign = prompt[key]
+      if (typeof orign === 'function') {
+        prompt[key] = function () {
+          return orign.apply(this, [injectData, ...(Array.prototype.slice.call(arguments))])
+        }
+      }
+    })
+    return prompt
+  })
+}
+
 module.exports = {
   log,
   getGitUser () {
@@ -229,7 +244,10 @@ module.exports = {
 
     if (exec === true) {
       if (prompts.length > 0) {
-        Inquirer.prompt(prompts).then(anwsers => {
+        Inquirer.prompt(injectPrompt(prompts, {
+          cmds,
+          argvs
+        })).then(anwsers => {
           fn({
             cmds,
             argvs: Object.assign(argvs, anwsers)
