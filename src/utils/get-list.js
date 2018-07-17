@@ -15,11 +15,12 @@ module.exports = () => {
   }).then(data => {
     const { results = [] } = data
     return results.map(pkg => {
-      const { package: { name, description, version } } = pkg
+      const { package: { name, description, version, keywords } } = pkg
       return {
         name,
         description,
-        version
+        version,
+        keywords
       }
     })
   })

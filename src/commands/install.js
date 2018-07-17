@@ -7,8 +7,9 @@
  * @description 
  * 1. 在小程序项目中，pa install component 默认将安装官方维护的组件库中对应的组件
  * 2. 支持通过配置制定额外的小程序组件库，优先从配置的组件库中下载组件
- * 3. 通过 --npm 可以在小程序项目中通过 pa install 来安装 npm 包
- * 4. 非小程序项目中 pa install 默认安装 npm 包
+ * 3. 通过 --npm 可以在小程序项目中通过 pa install 来安装 npm 包, 支持 npm i 的所有参数
+ * 4. 非小程序项目中 pa install 默认安装 npm 包，支持 npm i 的所有参数
+ * 5. 通过 keywords 中是否包含 ’miniprogram‘ 来判断是否为小程序脚手架
 */
 
 const { log, getConfig, getCwd, renderAscii, mkdirs } = require('../utils')
@@ -20,6 +21,8 @@ const got = require('got')
 const tar = require('tar')
 const showProgress = require('crimson-progressbar')
 const del = require('del')
+const npmi = require('npmi')
+const npmConf = require('../utils/npmConf')
 
 exports.command = 'install'
 
@@ -30,12 +33,10 @@ exports.desc = 'Install wechat miniprogram custom components.'
 exports.builder = yargs => {
   yargs.options({
     dest: {
-      alias: 'd',
       describe: 'Specify the destination directory where install the compoents.',
       default: 'src/components'
     },
     nocache: {
-      alias: 'n',
       describe: 'Install the component with no cache.',
       default: false
     },
@@ -46,7 +47,6 @@ exports.builder = yargs => {
   }).boolean(['nocache', 'npm']).argv
 } 
 
-const boilName = '@pandolajs/pandora-boilerplate-wechat'
 const componentRegisty = '@pandolajs/pandora-ui-wechat'
 
 // 复制组件
@@ -72,47 +72,94 @@ function copyComponent(from, to, version, cwd) {
   log.success(`+ ${componentRegisty}/${path.basename(from)}@${version}`)
 }
 
-exports.handler = argvs => {
-  const { _: [cmd, component], config, nocache, dest, npm } = argvs
-  const { boilerplate: { name } = {} } = getConfig(config)
+// npm conf map
+function npmConfig (npmOption = {}) {
+  let result = {}
+  Object.keys(npmOption).forEach(key => {
+    if (npmOption.hasOwnProperty(key)) {
+      if (npmConf.hasOwnProperty(key)) {
+        const targetKey = npmConf[key]
+        if (typeof targetKey === 'string') {
+          result[targetKey] = npmOption[key]
+        } else if (typeof targetKey === 'object') {
+          result = Object.assign(result, targetKey)
+        }
+      } else {
+        result[key] = npmOption[key]
+      }
+    }
+  })
+  return result
+}
 
-  if (name !== boilName || npm ) {
-    log.error(`The ${cmd} command only work in ${boilName} project.`)
-    return renderAscii()
-  }
+// download miniprogram component registry.
+async function downloadRegistry (registries, config) {
+  const cwd = getCwd(config)
+  const cachePath = path.join(cwd, CACHE_DIR)
+  const promises = []
+
+  registries.forEach(registry => {
+    const { name } = registry
+    const registryPath = path.join(cachePath, name)
+    
+    if (!fs.existsSync(registryPath)) {
+      mkdirs(registryPath, path.dirname(cachePath))
+      const promise = pkg(name, { fullMetadata: true }).then(async metadata => {
+        const { dist: { tarball } } = metadata
+        log(`\nStart downloading ${tarball}`)
+        const stream = await got.stream(tarball)
+          .on('downloadProgress', ({ percent }) => {
+            showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)
+          })
+        
+        return new Promise((resolve, reject) => {
+          stream.pipe(tar.x({
+            strip: 1,
+            C: registryPath
+          })).on('close', () => {
+            resolve()
+          }).on('error', () => {
+            reject()
+          })
+        })
+      })
+      promises.push(promise)
+    }
+  })
+  return Promise.all(promises)
+}
+
+exports.handler = argvs => {
+  const { _: [cmd, component], config, nocache, dest, npm, version, ...npmOptions } = argvs
+  const { boilerplate: { keywords = [] } = {}, components = [] } = getConfig(config)
 
   let parentCmd = path.basename(process.argv[1])
   if (component === undefined) {
     log.error('You must specify a component name that you want to install.')
-    log('', null, false)
+    log.line()
     log('Usage', null, false)
-    log(`    ${parentCmd} ${cmd} <component>`)
+    log(`    ${parentCmd} ${cmd} <component>`, null, false)
     return renderAscii()
   }
 
-  log(`Start install component ${component} ...`)
+  if (!keywords.includes('miniprogram') || npm ) {
+    const [ npmPkg, version = 'latest' ] = component.split('@')
+    return npmi({
+      name: npmPkg,
+      version,
+      npmLoad: Object.assign({
+        save: true
+      }, npmConfig(npmOptions))
+    }, ( error ) => {
+      if (error) {
+        return log.error(`install ${npmPkg} error.`)
+      }
+      return log.success(`+ ${npmPkg}@${version}`)
+    })
+  }
+
   const cwd = getCwd(config)
   const cachePath = path.join(cwd, CACHE_DIR)
-  const registyPath = path.join(cachePath, componentRegisty)
-  const componentPkg = path.join(registyPath, 'package.json')
-
-  // 如果未使用 flag --no-cache 
-  if (!nocache && fs.existsSync(componentPkg)) {
-    const { main, version } = require(componentPkg)
-    if (main) {
-      const componentPath = path.join(registyPath, main, component)
-      try {
-        log('Install from cache ...')
-        copyComponent(componentPath, path.join(cwd, dest, component), version, cwd)
-        return true
-      } catch(error) {
-        console.log(error)
-        log.error('Invalide cache.')
-        log(`You may run cmd: '${parentCmd} install ${component} --no-cache' to fix it.`)
-        return renderAscii()
-      }
-    }
-  }
 
   if (nocache) {
     log('Start cleaning cache ...')
@@ -120,29 +167,36 @@ exports.handler = argvs => {
     log('Finish cleaning cache.')
   }
 
-  !fs.existsSync(registyPath) && mkdirs(registyPath, path.dirname(cachePath))
-
-  pkg(componentRegisty, { fullMetadata: true }).then(async metadata => {
-    const { dist: { tarball }, main, version } = metadata
-    console.log('pkg:', tarball, main, version)
-    log(`Start downloading ${tarball}`)
-    const stream = await got.stream(tarball)
-      .on('downloadProgress', ({ percent }) => {
-        showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)
-      })
-    stream.pipe(tar.x({
-      strip: 1,
-      C: registyPath
-    })).on('close', () => {
-      const componentPath = path.join(registyPath, main, component)
-      if (fs.existsSync(componentPath) && fs.readdirSync(componentPath).length > 0) {
-        log('', null, false)
-        copyComponent(componentPath, path.join(cwd, dest, component), version, cwd)
-      } else {
-        log('', null, false)
-        log.error('Invalid component name.')
-        return renderAscii()
+  log(`Start install component ${component} ...`)
+  const registries = [...components, { name: '@pandolajs/pandora-ui-wechat' }]
+  downloadRegistry(registries, config).then(() => {
+    let installed = false
+    function it () {
+      return registries.shift() || {}
+    }
+    log.line()
+    
+    do {
+      let { name, path: p } = it()
+      const registryPath = path.join(cachePath, name)
+      const { main, version } = require(path.join(registryPath, 'package.json'))
+      if (!p) {
+        p = main
       }
-    })
+      const componentPath = path.join(registryPath, p, component)
+      if (fs.existsSync(componentPath)) {
+        copyComponent(componentPath, path.join(cwd, dest, component), version, cwd)
+        installed = true
+      }
+    } while (registries.length && !installed)
+    
+    if (!installed) {
+      log.error('Invalid component name.')
+      renderAscii()
+    }
+  }).catch(() => {
+    log.info(`Install component ${component} fail.`)
+    log.info(`You can try cmd: '${parentCmd} install ${component} --no-cache' to fix it.`)
+    renderAscii()
   })
 }

@@ -178,7 +178,8 @@ exports.handler = async argvs => {
     const configObj = {
       boilerplate: {
         name: boil,
-        version: curBoil[0].version
+        version: curBoil[0].version,
+        keywords: curBoil[0].keywords
       },
       user: {
         name: userName,
@@ -222,7 +223,7 @@ exports.handler = async argvs => {
             log.success(`Successed install ${result.length} npm packages.`)
             log('', null, false)
             log('', null, false)
-            log.success('Project finish init. Enjoy youself!')
+            log.success('Project finish init Enjoy youself!')
             renderAscii()
           })
         })

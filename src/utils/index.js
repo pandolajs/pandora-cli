@@ -70,7 +70,7 @@ function getConfig (configPath) {
 // 生成日期
 function currentDate () {
   const date = new Date()
-  return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}:${`${date.getDate()}`.padStart(2, '0')}`
+  return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}-${`${date.getDate()}`.padStart(2, '0')}`
 }
 
 // 递归读文件

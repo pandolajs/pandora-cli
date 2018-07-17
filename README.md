@@ -26,6 +26,8 @@
 
 - [如何开发为 pandora-cli 开发一个项目脚手架](./docs/how-to-develop-a-boilerplate-for-pandora.md)
 
+- [.pandora.conf.json 配置详解](./docs/configuration.md)
+
 ## 使用 
 
 全局安装：
