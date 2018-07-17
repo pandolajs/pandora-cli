@@ -148,11 +148,7 @@ module.exports = argv => {
   - [ ] 支持项目模板升级提醒
   - [ ] 支持列出三方项目模板
 
-- [ ] 新增 pa remove <component> 用来移除已安装的小程序组件
-
-- [ ] 新增 pa release 命令用来发布部署项目
-
-- [ ] 升级 command hook 机制，支持 before-cmd post-cmd 脚本
+- [x] 升级 command hook 机制
 
 - [ ] pandolajs 静态站点建设
 
