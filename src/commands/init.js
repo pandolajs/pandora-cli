@@ -153,7 +153,7 @@ exports.handler = async argvs => {
     const finalAnwsers = Object.assign({}, {
       boilerplate, name, author, email
     }, anwsers)
-    
+
     const { overWrite, name: projectName, boilerplate: boil, author: userName, email: userEmail, appId } = finalAnwsers
     const curBoil = list.filter(item => {
       return item.name === boil
@@ -196,7 +196,7 @@ exports.handler = async argvs => {
         .on('downloadProgress', ({ percent }) => {
           showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)
         })
-      
+
       stream.pipe(tar.x({
         strip: 1,
         C: proPath
@@ -227,7 +227,7 @@ exports.handler = async argvs => {
             renderAscii()
           })
         })
-        ignoreStream.end(`.DS_Store\n.idea\nbuild\ncoverage\nnode_modules\nnpm-debug.log\nyarn-error.log\n.vscode\nyarn.lock\ndist`)
+        ignoreStream.end(`.DS_Store\n.idea\nbuild\ncoverage\nnode_modules\nnpm-debug.log\nyarn-error.log\n.vscode\nyarn.lock\ndist\n.pandora/.cache`)
       })
     })
   })
