@@ -6,7 +6,7 @@
 
 const chalk = require('chalk')
 require('console.table')
-const gitConfig = require('gitconfig')
+const { execSync } = require('child_process')
 const fs = require('fs')
 const path = require('path')
 const deepExtend = require('deep-extend')
@@ -144,11 +144,14 @@ function injectPrompt (prompts = [], injectData = {}) {
 module.exports = {
   log,
   getGitUser () {
-    return gitConfig.get({
-      location: 'global'
-    }).then(({ user = {} } = {}) => {
-      return user
-    })
+    let name = ''
+    let email = ''
+    name = execSync('git config --global --get user.name')
+    email = execSync('git config --global --get user.email')
+    return {
+      name: name.toString(),
+      email: email.toString()
+    }
   },
   getConfig,
   // 保存配置
