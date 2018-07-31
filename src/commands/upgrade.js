@@ -2,7 +2,8 @@
  * @fileOverview pandora-cli upgrade command
  * @author sizhao | 870301137@qq.com
  * @version 1.0.0 | 2018-06-27 | sizhao       // 初始版本
- * @description 
+ * @version 1.1.0 | 2018-07-31 | sizhao       // 
+ * @description
  * 1. 用来升级项目中所使用脚手架的 scripts 和 .pandora
  * 2. 更新 .pandora.conf.json 中脚手架的版本号
 */

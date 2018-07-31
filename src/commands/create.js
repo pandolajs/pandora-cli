@@ -2,6 +2,7 @@
  * @fileOverview pandora-cli create command
  * @author sizhao | 870301137@qq.com
  * @version 1.0.0 | 2018-06-24 | sizhao       // 初始版本
+ * @version 1.1.0 | 2018-07-31 | sizhao       // pa create 支持 templates 配置
 */
 
 const Inquirer = require('inquirer')
@@ -52,7 +53,7 @@ exports.handler = async argvs => {
   }
 
   const cwd = getCwd(config)
-  const destCwd = process.cwd()
+  let destCwd = process.cwd()
 
   const buildInTempPath = path.resolve(__dirname, buildInSuffix)
   const projectTempPath = path.resolve(cwd, suffix)
@@ -64,8 +65,15 @@ exports.handler = async argvs => {
     return false
   }
 
+  const pandoraConf = getConfig(config)
+
+  const { templates = {} } = pandoraConf
+  if (!/\//.test(filename) && templates[fileType]) {
+    destCwd = path.join(cwd, templates[fileType])
+  }
+
   if (!author || !email) {
-    let { user = {} } = getConfig(config)
+    let { user = {} } = pandoraConf
     if (!user.name || !user.email) {
       user = await getGitUser()
     }
@@ -107,7 +115,7 @@ exports.handler = async argvs => {
     message: 'Please enter a user name:',
     default: '',
     when ({ override = true }) {
-      return override 
+      return override
     }
   })
 
@@ -165,7 +173,7 @@ exports.handler = async argvs => {
       } else if (fs.existsSync(buildInTemp)) {
         let tempStr = fs.readFileSync(buildInTemp, { encoding: 'utf8' })
         content = template(tempStr, tempObj)
-      } 
+      }
 
       const stream = fs.createWriteStream(path.join(destCwd, filename))
       stream.end(content)
