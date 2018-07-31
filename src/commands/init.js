@@ -175,19 +175,6 @@ exports.handler = async argvs => {
       mkdir(proPath)
     }
 
-    const configObj = {
-      boilerplate: {
-        name: boil,
-        version: curBoil[0].version,
-        keywords: curBoil[0].keywords
-      },
-      user: {
-        name: userName,
-        email: userEmail
-      }
-    }
-    saveConfig(configObj, path.join(proPath, DEFAULT_NAME))
-
     // 下载脚手架
     pkg(boil).then(async metadata => {
       const { dist: { tarball } } = metadata
@@ -228,6 +215,18 @@ exports.handler = async argvs => {
           })
         })
         ignoreStream.end(`.DS_Store\n.idea\nbuild\ncoverage\nnode_modules\nnpm-debug.log\nyarn-error.log\n.vscode\nyarn.lock\ndist\n.pandora/.cache`)
+        const configObj = {
+          boilerplate: {
+            name: boil,
+            version: curBoil[0].version,
+            keywords: curBoil[0].keywords
+          },
+          user: {
+            name: userName,
+            email: userEmail
+          }
+        }
+        saveConfig(configObj, path.join(proPath, DEFAULT_NAME))
       })
     })
   })

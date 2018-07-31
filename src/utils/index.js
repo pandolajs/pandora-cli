@@ -149,8 +149,8 @@ module.exports = {
     name = execSync('git config --global --get user.name')
     email = execSync('git config --global --get user.email')
     return {
-      name: name.toString(),
-      email: email.toString()
+      name: name.toString().trim(),
+      email: email.toString().trim()
     }
   },
   getConfig,
