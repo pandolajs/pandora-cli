@@ -67,6 +67,28 @@
 
 升级项目模板，主要是用来更新项目根目录 `.pandora` 目录中的 `templates` 和 `scripts` 中的内容。使用 `--scripts` 来更新项目根目录 `scripts` 中的脚本。
 
+如果你的项目不是 pandora 项目，你也可以执行以下命令将已有项目升级为制定脚手架的 pandora 项目
+
+```
+  pa upgrade -b <boilerplate-name>
+```
+
+比如将一个 pandora 小程序项目升级为使用 `@pandolajs/pandora-boilerplate-wechat` 的 pandora 小程序，可以执行此命令
+
+```
+  pa upgrade -b @pandolajs/pandora-boilerplate-wechat
+```
+
+> 执行完此命令，项目中会新增 `.pandora.conf.json` 配置文件和 `.pandora` pandora 项目配置文件夹
+
+如果你希望使用脚手架中的构建脚本，那么，你可以可以以下命令：
+
+```
+  pa upgrade -b @pandolajs/pandora-boilerplate-wechat --scripts
+```
+
+> 执行完此命令，除了会新增上述的配置文件与文件夹外，还会新增 scripts 目录，并在 package.json 中新增对应的 scripts 字段值。
+
 - pa install <component> [--dest=path/to/install/component] [--nocache]
 
 这个命令是专门用来安装小程序组件的，只在由 `@pandolajs/pandora-boilerplate-wechat` 项目模板初始化的项目中生效。[点击查看](https://github.com/pandolajs/pandora-boilerplate-wechat) 项目模板。我们会分析组件的依赖，一并安装。

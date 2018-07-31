@@ -59,9 +59,7 @@ log.table = (list) => {
 
 // 获取配置
 function getConfig (configPath) {
-  try {
-    fs.accessSync(configPath, fs.constants.F_OK | fs.constants.W_OK)
-  } catch(error) {
+  if (!fs.existsSync(configPath)) {
     return {}
   }
   return require(configPath)
@@ -120,8 +118,12 @@ function renderAscii () {
 function saveConfig (config, configPath) {
   let originalConfig = getConfig(configPath)
   config = deepExtend(originalConfig, config)
-  const stream = fs.createWriteStream(configPath)
-  stream.end(JSON.stringify(config, null, '  '))
+  return new Promise(resolve => {
+    const stream = fs.createWriteStream(configPath)
+    stream.end(JSON.stringify(config, null, '  '), 'utf8', () => {
+      resolve()
+    })
+  })
 }
 
 // inject prompt
@@ -186,13 +188,14 @@ module.exports = {
   versionCompare (v1, v2) {
     const curVer = v1.split('.')
     const specVer = v2.split('.')
-  
+    const semver = ['major', 'minor', 'patch']
+
     for(let i = 0, len = curVer.length; i < len; i ++){
       if(curVer[i] !== specVer[i]){
-        return curVer[i] - specVer[i] > 0 ? true : false
+        return curVer[i] - specVer[i] > 0 ? { semver: semver[i], upgrade: true } : { upgrade: false }
       }
       if(i >= len - 1){
-        return false
+        return { upgrade: false }
       }
     }
   },
@@ -208,7 +211,7 @@ module.exports = {
     }
     const cwd = getCwd(config)
     let scriptPath = path.join(cwd, `${HOOK_DIR}/scripts/${cmds[0]}.js`)
-    
+
     while (!fs.existsSync(scriptPath) && alias.length > 0) {
       scriptPath = path.join(cwd, `${HOOK_DIR}/scripts/${alias.shift()}.js`)
     }
