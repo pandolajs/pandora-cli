@@ -161,7 +161,7 @@ module.exports = {
     if (!dirPath) {
       return
     }
-    fs.mkdirSync(dirPath)
+    !fs.existsSync(dirPath) && fs.mkdirSync(dirPath)
   },
   // 绘制字节码
   renderAscii,

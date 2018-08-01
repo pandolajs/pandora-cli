@@ -2,6 +2,10 @@
  * @fileOverview pandora-cli init command
  * @author sizhao | 870301137@qq.com
  * @version 1.0.0 | 2018-06-26 | sizhao       // 初始版本
+ * @version 1.1.0 | 2018-08-01 | sizhao       // 支持通过指定非官方脚手架初始化项目
+ *
+ * @description
+ * 通过 -b 参数可以指定非官方脚手架，脚手架必须发布 npm 包
 */
 
 const Inquire = require('inquirer')
@@ -24,7 +28,8 @@ exports.desc = 'Initial a project with a boilerplate.'
 exports.builder = {
   'boilerplate': {
     alias: 'b',
-    describe: 'Specifiy the project boilerplate.'
+    describe: 'Specifiy the project boilerplate.',
+    default: undefined
   },
   'author': {
     alias: 'a',
@@ -48,6 +53,20 @@ function initProject (proPath, inject) {
   }), null, '  '))
   readFiles(proPath, {ignore: ['.{pandora,git,idea,vscode,DS_Store}/**/*', '{scripts,dist,node_modules}/**/*', '**/*.{png,jpg,jpeg,gif,bmp,webp}'], gitignore: true}, ({ path, content }) => {
     fs.createWriteStream(path).end(template(content, inject))
+  })
+}
+
+function getBoilerplateMeta (boilerplate) {
+  return pkg(boilerplate, { fullMetadata: true }).then(metadata => {
+    const { dist: { tarball }, version, keywords } = metadata
+    return {
+      tarball,
+      version,
+      keywords,
+      name: boilerplate
+    }
+  }).catch(() => {
+    return { name: boilerplate }
   })
 }
 
@@ -78,11 +97,11 @@ exports.handler = async argvs => {
     }
   })
 
-  // 选择模板
-  const list = await getList().catch(({ message = 'Get boilerplates failed.' }) => {
-    log.error(message)
-  })
   if (!boilerplate) {
+    // 选择模板
+    const list = await getList().catch(({ message = 'Get boilerplates failed.' }) => {
+      log.error(message)
+    })
     const choices = list.map(item => {
       const { name } = item
       return name
@@ -92,8 +111,13 @@ exports.handler = async argvs => {
       type: 'list',
       name: 'boilerplate',
       message: 'Please select a boilerplate that you want to use:',
-      choices
+      choices,
+      filter (input) {
+        return getBoilerplateMeta(input)
+      }
     })
+  } else {
+    boilerplate = await getBoilerplateMeta(boilerplate)
   }
 
   // 如果选择的 boilerplate 是微信小程序，则输入 appId
@@ -108,8 +132,8 @@ exports.handler = async argvs => {
       return true
     },
     when (anwsers) {
-      const { boilerplate = '' } = anwsers
-      return /pandora-boilerplate-wechat/i.test(boilerplate)
+      const { boilerplate: { keywords } = boilerplate } = anwsers
+      return keywords.includes('miniprogram')
     }
   })
 
@@ -149,22 +173,12 @@ exports.handler = async argvs => {
   })
 
   // 最终处理
-  Inquire.prompt(prompts).then(anwsers => {
+  Inquire.prompt(prompts).then(async anwsers => {
     const finalAnwsers = Object.assign({}, {
-      boilerplate, name, author, email
+      name, author, email
     }, anwsers)
 
-    const { overWrite, name: projectName, boilerplate: boil, author: userName, email: userEmail, appId } = finalAnwsers
-    const curBoil = list.filter(item => {
-      return item.name === boil
-    })
-
-    // 如果输入的脚手架名称不对，退出命令行
-    if (curBoil.length <= 0) {
-      log.error(`Invalid boilerplate '${boilerplate}'`)
-      renderAscii()
-      return false
-    }
+    const { overWrite, name: projectName, boilerplate: boil = boilerplate, author: userName, email: userEmail, appId } = finalAnwsers
 
     const proPath = path.join(cwd, projectName)
     if (overWrite === false) {
@@ -176,58 +190,61 @@ exports.handler = async argvs => {
     }
 
     // 下载脚手架
-    pkg(boil).then(async metadata => {
-      const { dist: { tarball } } = metadata
-      log(`Starting download ${tarball}`)
-      const stream = await got.stream(tarball)
-        .on('downloadProgress', ({ percent }) => {
-          showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)
-        })
-
-      stream.pipe(tar.x({
-        strip: 1,
-        C: proPath
-      })).on('close', () => {
-        const ignoreStream = fs.createWriteStream(path.join(proPath, '.gitignore'))
-        log.line(2)
-        log.info('Start install npm packages ...')
-        ignoreStream.on('close', () => {
-          initProject(proPath, {
-            AppId: appId,
-            ProjectName: path.basename(proPath),
-            User: userName,
-            Email: userEmail,
-            Date: currentDate()
-          })
-
-          fs.existsSync(path.join(proPath, 'package.json')) && npmi({
-            path: proPath,
-            localInstall: true
-          }, (error, result) => {
-            if (error) {
-              return console.error(error)
-            }
-            log.success(`Successed install ${result.length} npm packages.`)
-            log('', null, false)
-            log('', null, false)
-            log.success('Project finish init Enjoy youself!')
-            renderAscii()
-          })
-        })
-        ignoreStream.end(`.DS_Store\n.idea\nbuild\ncoverage\nnode_modules\nnpm-debug.log\nyarn-error.log\n.vscode\nyarn.lock\ndist\n.pandora/.cache`)
-        const configObj = {
-          boilerplate: {
-            name: boil,
-            version: curBoil[0].version,
-            keywords: curBoil[0].keywords
-          },
-          user: {
-            name: userName,
-            email: userEmail
-          }
-        }
-        saveConfig(configObj, path.join(proPath, DEFAULT_NAME))
+    const { tarball, version, keywords } = boil
+    if (tarball <= 0) {
+      log.error(`Invalid boilerplate '${boilerplate}'`)
+      renderAscii()
+      return false
+    }
+    log(`Starting download ${tarball}`)
+    const stream = await got.stream(tarball)
+      .on('downloadProgress', ({ percent }) => {
+        showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)
       })
+
+    stream.pipe(tar.x({
+      strip: 1,
+      C: proPath
+    })).on('close', () => {
+      const ignoreStream = fs.createWriteStream(path.join(proPath, '.gitignore'))
+      log.line(2)
+      log.info('Start install npm packages ...')
+      ignoreStream.on('close', () => {
+        initProject(proPath, {
+          AppId: appId,
+          ProjectName: path.basename(proPath),
+          User: userName,
+          Email: userEmail,
+          Date: currentDate()
+        })
+
+        fs.existsSync(path.join(proPath, 'package.json')) && npmi({
+          path: proPath,
+          localInstall: true
+        }, (error, result) => {
+          if (error) {
+            return console.error(error)
+          }
+          log.success(`Successed install ${result.length} npm packages.`)
+          log('', null, false)
+          log('', null, false)
+          log.success('Project finish init Enjoy youself!')
+          renderAscii()
+        })
+      })
+      ignoreStream.end(`.DS_Store\n.idea\nbuild\ncoverage\nnode_modules\nnpm-debug.log\nyarn-error.log\n.vscode\nyarn.lock\ndist\n.pandora/.cache`)
+      const configObj = {
+        boilerplate: {
+          name: boil.name,
+          version,
+          keywords
+        },
+        user: {
+          name: userName,
+          email: userEmail
+        }
+      }
+      saveConfig(configObj, path.join(proPath, DEFAULT_NAME))
     })
   })
 }
