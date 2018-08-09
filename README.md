@@ -28,6 +28,8 @@
 
 - [.pandora.conf.json 配置详解](./docs/configuration.md)
 
+- [使用 pandora-cli 完成对小程序的持续集成](./docs/how-to-intergre-miniprogram-into-jenkins-via-pandora.md)
+
 ## 使用 
 
 全局安装：
@@ -73,13 +75,13 @@
 
 升级项目模板，主要是用来更新项目根目录 `.pandora` 目录中的 `templates` 和 `scripts` 中的内容。使用 `--scripts` 来更新项目根目录 `scripts` 中的脚本。
 
-如果你的项目不是 pandora 项目，你也可以执行以下命令将已有项目升级为制定脚手架的 pandora 项目
+如果你的项目不是 pandora 项目，你也可以执行以下命令将已有项目升级为指定脚手架的 pandora 项目
 
 ```
   pa upgrade -b <boilerplate-name>
 ```
 
-比如将一个 pandora 小程序项目升级为使用 `@pandolajs/pandora-boilerplate-wechat` 的 pandora 小程序，可以执行此命令
+比如将一个非 pandora 小程序项目升级为使用 `@pandolajs/pandora-boilerplate-wechat` 的 pandora 小程序，可以执行此命令
 
 ```
   pa upgrade -b @pandolajs/pandora-boilerplate-wechat
