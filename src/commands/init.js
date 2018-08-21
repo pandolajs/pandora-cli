@@ -3,13 +3,16 @@
  * @author sizhao | 870301137@qq.com
  * @version 1.0.0 | 2018-06-26 | sizhao       // 初始版本
  * @version 1.1.0 | 2018-08-01 | sizhao       // 支持通过指定非官方脚手架初始化项目
+ * @version 1.2.0 | 2018-08-21 | sizhao       // 支持 --ignore 参数，用于初始化脚手架时通过 glob 来忽略脚手架中的某些目录
  *
  * @description
- * 通过 -b 参数可以指定非官方脚手架，脚手架必须发布 npm 包
+ * 1. 通过 -b 参数可以指定非官方脚手架，脚手架必须发布 npm 包
+ * 2. --ignore 的设计初衷是为了支持小程序持续化集成，对现有非 pandora 化的项目进行一键改造为 pandora 项目(比如现有小程序项目中已经有 src 目录了，我们在初始化项目的时候并不需要包脚手架中的 src 目录解压出来)，支持 CI.
 */
 
 const Inquire = require('inquirer')
 const getList = require('../utils/get-list')
+const globMatch = require('micromatch')
 const path = require('path')
 const fs = require('fs')
 const pkg = require('package-json')
@@ -25,22 +28,29 @@ exports.command = 'init'
 
 exports.desc = 'Initial a project with a boilerplate.'
 
-exports.builder = {
-  'boilerplate': {
-    alias: 'b',
-    describe: 'Specifiy the project boilerplate.',
-    default: undefined
-  },
-  'author': {
-    alias: 'a',
-    describe: 'Input the user name.',
-    default: ''
-  },
-  'email': {
-    alias: 'e',
-    describe: 'Input the user email.',
-    default: ''
-  }
+exports.builder = yargs => {
+  yargs.options({
+    boilerplate: {
+      alias: 'b',
+      describe: 'Specifiy the project boilerplate.',
+      default: undefined
+    },
+    author: {
+      alias: 'a',
+      describe: 'Input the user name.',
+      default: ''
+    },
+    email: {
+      alias: 'e',
+      describe: 'Input the user email.',
+      default: ''
+    },
+    ignores: {
+      alias: 'i',
+      describe: 'Ignore the files specified by glob patterns.',
+      default: []
+    }
+  }).array('ignores')
 }
 
 function initProject (proPath, inject) {
@@ -71,7 +81,7 @@ function getBoilerplateMeta (boilerplate) {
 }
 
 exports.handler = async argvs => {
-  let { boilerplate, _: [cmd, name], author, email, config } = argvs
+  let { boilerplate, _: [cmd, name], author, email, config, ignores } = argvs
   const cwd = process.cwd()
 
   if (!author || !email) {
@@ -202,10 +212,21 @@ exports.handler = async argvs => {
         showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)
       })
 
-    stream.pipe(tar.x({
+    const tarOpts = {
       strip: 1,
       C: proPath
-    })).on('close', () => {
+    }
+
+    if (ignores.length) {
+      tarOpts.filter = (path) => {
+        let matched = globMatch.some(path.replace('package/', ''), ignores, {
+          dot: true
+        })
+        return !matched
+      }
+    }
+
+    stream.pipe(tar.x(tarOpts)).on('close', () => {
       const ignoreStream = fs.createWriteStream(path.join(proPath, '.gitignore'))
       log.line(2)
       log.info('Start install npm packages ...')

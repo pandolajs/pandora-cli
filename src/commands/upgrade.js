@@ -6,6 +6,7 @@
  *                                            // 1. 支持通过 -b, --boilerplate 参数初始化某个项目为制定项目
  *                                            // 2. 支持 --scripts 参数时，深度 merge package.json
  *                                            // 3. 支持 --force 参数，非 --force 时，major upgrade 升级提示
+ * @version 1.2.0 | 2018-08-13 | sizhao       // 1. 修复 --scripts 时未更新 build.config.js 的bug
  * @description
  * 1. 用来升级项目中所使用脚手架的 scripts 和 .pandora
  * 2. 更新 .pandora.conf.json 中脚手架的版本号
@@ -36,15 +37,15 @@ exports.builder = yargs => {
       default: false
     },
     force: {
-      descripbe: 'Force upgrade ignore broken change.',
+      describe: 'Force upgrade ignore broken change.',
       default: false
     },
     boilerplate: {
       alias: 'b',
-      descripbe: 'Specify the boilerplate that want to init/upgrade.',
+      describe: 'Specify the boilerplate that want to init/upgrade.',
       default: ''
     }
-  }).boolean(['scripts', 'force'])
+  }).boolean(['scripts', 'force', 'allfeatures'])
 }
 
 // 复制文件
@@ -98,6 +99,7 @@ exports.handler = async argvs => {
   const buildinSouTempPath = path.join(boilerplatePath, HOOK_DIR, 'templates')
   const buildinSouScriptPath = path.join(boilerplatePath, HOOK_DIR, 'scripts')
   const buildinPkgPath = path.join(boilerplatePath, 'package.json')
+  const buildinBuildConfPath = path.join(boilerplatePath, 'build.config.js')
   const buildinPandoraConfPath = path.join(boilerplatePath, '.pandora.conf.json')
   const customSouScriptPath = path.join(boilerplatePath, 'scripts')
   const buildinTarTempPath = path.join(cwd, HOOK_DIR, 'templates')
@@ -140,6 +142,9 @@ exports.handler = async argvs => {
       fs.createWriteStream(curPkgPath).end(JSON.stringify(deepExtend({}, curPkg, {
         scripts: remotePkg.scripts
       }), null, '  '))
+
+      // replace build.config.js
+      fs.copyFileSync(buildinBuildConfPath, path.join(cwd, 'build.config.js'))
     }
 
     const upgradeConf = {

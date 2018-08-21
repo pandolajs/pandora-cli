@@ -109,10 +109,11 @@ pa start --env prod 将执行 scripts.build:prod 命令
 
 ### 裸小程序项目
 
-如果项目中未使用任何主流框架，则需要将项目的源码部分包含在 `src` 目录下，然后现在项目根目录下执行以下命令：
+如果项目中未使用任何主流框架，则需要将项目的源码部分包含在 `src` 目录下，删除原来的 `project.config.json` 文件，然后现在项目根目录下执行以下命令：
 
 ```
-  pa upgrade -b @pandolajs/pandora-boilerplate-wechat --scripts --allfeature
+  cd project-root
+  pa init -b @pandolajs/pandora-boilerplate-wechat --ignores 'src/**/*' --
 ```
 
 执行完以上命令，与 src 目录同级将多如下主要文件及文件夹
