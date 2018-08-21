@@ -113,7 +113,7 @@ pa start --env prod 将执行 scripts.build:prod 命令
 
 ```
   cd project-root
-  pa init -b @pandolajs/pandora-boilerplate-wechat --ignores 'src/**/*' --
+  pa init . -b @pandolajs/pandora-boilerplate-wechat --ignores 'src/**/*' --
 ```
 
 执行完以上命令，与 src 目录同级将多如下主要文件及文件夹
