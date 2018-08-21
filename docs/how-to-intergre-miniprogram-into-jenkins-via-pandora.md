@@ -18,19 +18,19 @@
 
 ### 第一步：从版本库拉取到项目后，进入到项目根目录
 
-```
+```bash
   cd project_root
 ```
 
 ### 第二步：安装项目依赖
 
-```
+```bash
   npm i
 ```
 
 ### 第三步：执行如下命令
 
-```
+```bash
   // 构建测试环境包
   pa build --env test
 
@@ -43,7 +43,7 @@
 
 ### 第四步：发版
 
-```
+```bash
   pa release <version> -m '这次构建的描述'
 ```
 
@@ -67,7 +67,7 @@
 
 使用 pandora-cli 初始化的项目，无需做任何改动，可以在项目根目录中执行如下命令对现有项目的脚手架进行升级：
 
-```
+```bash
   pa upgrade --scripts
 ```
 
@@ -77,20 +77,20 @@
 
 第一步：首先要在项目中执行以下命令，对项目进行 pandora 化
 
-```
+```bash
   pa upgrade -b @pandolajs/pandora-boilerplate-wechat
 ```
 
 命令执行完成后，项目根目录下会新增如下文件及文件夹
 
-```
+```bash
  - .pandora.conf.json   // pandora 项目配置
  - .pandora             // pandora 私有工作区文件夹，其中包含项目脚本，样本代码模板，以及后续用来存在 pandora 操作时产生的中间文件，缓存等
 ```
 
 第二步：在 `package.json` 文件 `scripts` 字段中配置如下命令
 
-```
+```bash
   {
     "scripts": {
       "start": "the script when run in development environment.",
@@ -115,14 +115,14 @@ pa start --env prod 将执行 scripts.build:prod 命令
 
 如果项目中未使用任何主流框架，则需要将项目的源码部分包含在 `src` 目录下，删除原来的 `project.config.json` 文件，然后现在项目根目录下执行以下命令：
 
-```
+```bash
   cd project-root
   pa init . -b @pandolajs/pandora-boilerplate-wechat --ignores 'src/**/*' --
 ```
 
 执行完以上命令，与 src 目录同级将多如下主要文件及文件夹
 
-```
+```bash
   - .pandora.conf.json        // pandora 配置文件
   - build.config.js           // pandora 小程序构建配置
   - .pandora                  // pandora 私有工作区文件夹，其中包含项目脚本，样本代码模板，以及后续用来存在 pandora 操作时产生的中间文件，缓存等
@@ -136,7 +136,7 @@ pa start --env prod 将执行 scripts.build:prod 命令
 
 - 如果是用 `pa upgrade` 命令进行升级的，需要手动安装依赖
 
-```
+```bash
   npm i
 ```
 
@@ -144,7 +144,7 @@ pa start --env prod 将执行 scripts.build:prod 命令
 
 ### 第二步验证开发环境构建
 
-```
+```bash
   pa start
 ```
 
@@ -152,7 +152,7 @@ pa start --env prod 将执行 scripts.build:prod 命令
 
 ### 第三步验证生产环境构建
 
-```
+```bash
   pa build --env prod
 ```
 
@@ -160,7 +160,7 @@ pa start --env prod 将执行 scripts.build:prod 命令
 
 ### 第四步打开开发者工具
 
-```
+```bash
   pa open
 ```
 
@@ -168,7 +168,7 @@ pa start --env prod 将执行 scripts.build:prod 命令
 
 ### 第五步验证发布
 
-```
+```bash
   pa release patch -m '项目 pandora 化发布'
 ```
 

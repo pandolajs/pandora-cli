@@ -1,4 +1,4 @@
-# pandora-cli 
+# pandora-cli
 
 [![npm version](https://badge.fury.io/js/pandora-cli.svg)](https://badge.fury.io/js/pandora-cli)
 
@@ -9,7 +9,6 @@
 罗老师附体：
 
 > 我们重新定义了 CLI.
-
 > 这是东半球最好用的 CLI.
 
 隐约的听到有人在夸我帅 ~~~~ “啊，呸 ... 真没见过这么臭不要脸的开发者 ~~”
@@ -30,10 +29,11 @@
 
 - [使用 pandora-cli 完成对小程序的持续集成](./docs/how-to-intergre-miniprogram-into-jenkins-via-pandora.md)
 
-## 使用 
+## 使用
 
 全局安装：
-```
+
+```bash
   npm i -g pandora-cli
 
   pa init project
@@ -41,7 +41,7 @@
 
 或者，本地安装：
 
-```
+```bash
   npm i -D pandora-cli
 
   npx pa init project
@@ -59,13 +59,13 @@
 
 如果官方维护的项目模板中没有你需要的，那么你可以使用 `-b` 参数来指定你想使用的项目模板名（需发布到 npm 或者 npm 私服）
 
-```
+```bash
   pa init <projectName> -b <boilerplate>
 ```
 
 如果你是对已有项目进行初始化，你还可以使用 `--ignores` 来指定 `glob` 表达式来忽略脚手架中的目录或者文件，比如现有目录中已经有 `src` 目录，则我们可以在项目根目录下执行以下命令来把当前项目初始化为制定脚手架的项目
 
-```
+```bash
   pa init . -b <boilerplate> --ignores 'src/**/*' --
 ```
 
@@ -85,13 +85,13 @@
 
 如果你的项目不是 pandora 项目，你也可以执行以下命令将已有项目升级为指定脚手架的 pandora 项目
 
-```
+```bash
   pa upgrade -b <boilerplate-name>
 ```
 
 比如将一个非 pandora 小程序项目升级为使用 `@pandolajs/pandora-boilerplate-wechat` 的 pandora 小程序，可以执行此命令
 
-```
+```bash
   pa upgrade -b @pandolajs/pandora-boilerplate-wechat
 ```
 
@@ -99,13 +99,13 @@
 
 如果你希望使用脚手架中的构建脚本，那么，你可以可以以下命令：
 
-```
+```bash
   pa upgrade -b @pandolajs/pandora-boilerplate-wechat --scripts
 ```
 
 > 执行完此命令，除了会新增上述的配置文件与文件夹外，还会新增 scripts 目录，并在 package.json 中新增对应的 scripts 字段值。
 
-- pa install <component> [--dest=path/to/install/component] [--nocache]
+- `pa install <component> [--dest=path/to/install/component] [--nocache]`
 
 这个命令是专门用来安装小程序组件的，只在由 `@pandolajs/pandora-boilerplate-wechat` 项目模板初始化的项目中生效。[点击查看](https://github.com/pandolajs/pandora-boilerplate-wechat) 项目模板。我们会分析组件的依赖，一并安装。
 
@@ -119,7 +119,7 @@
 
 用来创建项目中的样板代码，并向样板代码中注入以下变量：
 
-```
+```bash
 @{Description}      文件描述
 @{User}             用户名
 @{Email}            用户邮箱
@@ -128,7 +128,7 @@
 
 pandora-cli 默认提供支持 `js`, `less`, `json`, `wxml` 后缀文件的创建。
 
-```
+```bash
 // 创建 js 文件
 pa create index.js
 ```
@@ -139,7 +139,7 @@ pa create index.js
 
 定义文件夹类型的样板代码集就比价简单了，直接创建文件目录，然后加入对应的样板代码文件即可，无需 `.temp` 后缀结尾。比如创建如下目录：
 
-```
+```bash
 .
 └── page
     ├── index.js
@@ -169,7 +169,7 @@ pa create index.js
 
 钩子脚本就是一个普通的 nodejs 模块，只要导入一个函数即可，函数的参数就是使用 cli 命令是输入的参数
 
-```
+```javascript
 module.exports = argv => {
   // do something what you want ...
 }
