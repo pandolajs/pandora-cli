@@ -1,6 +1,6 @@
 {
   "name": "pandora-cli",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "pandora cli",
   "main": "index.js",
   "scripts": {
