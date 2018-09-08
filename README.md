@@ -27,7 +27,7 @@
 
 - [.pandora.conf.json 配置详解](./docs/configuration.md)
 
-- [使用 pandora-cli 完成对小程序的持续集成](./docs/how-to-intergre-miniprogram-into-jenkins-via-pandora.md)
+- [使用 pandora-cli 完成对小程序的持续集成](./docs/how-to-intergre-miniprogram-into-jenkins-via-pandora.md)
 
 ## 使用
 
