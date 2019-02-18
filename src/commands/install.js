@@ -5,7 +5,7 @@
  * @version 1.1.0 | 2018-07-10 | sizhao       // pa i --npm 来安装 npm 包，或者非小程序项目中默认安装 npm 包
  *                                            // 支持通过配置制定小程序的组件库包
  * @version 1.2.0 | 2018-07-19 | sizhao       // 支持同时安装多个组件
- * @description 
+ * @description
  * 1. 在小程序项目中，pa install component 默认将安装官方维护的组件库中对应的组件
  * 2. 支持通过配置制定额外的小程序组件库，优先从配置的组件库中下载组件
  * 3. 通过 --npm 可以在小程序项目中通过 pa install 来安装 npm 包, 支持 npm i 的所有参数
@@ -46,12 +46,12 @@ exports.builder = yargs => {
       default: false
     }
   }).boolean(['nocache', 'npm']).argv
-} 
+}
 
 const componentRegisty = '@pandolajs/pandora-ui-wechat'
 
 // 复制组件
-function copyComponent(from, to, version, cwd) {
+function copyComponent(from, to, version, cwd, registryName = componentRegisty) {
   !fs.existsSync(to) && mkdirs(to, cwd)
   const files = fs.readdirSync(from)
   let json = ''
@@ -70,7 +70,7 @@ function copyComponent(from, to, version, cwd) {
     const dependency = path.resolve(from, cp)
     copyComponent(dependency, path.resolve(to, cp), version, cwd)
   })
-  log.success(`+ ${componentRegisty}/${path.basename(from)}@${version}`)
+  log.success(`+ ${registryName}/${path.basename(from)}@${version}`)
 }
 
 // npm conf map
@@ -102,7 +102,7 @@ async function downloadRegistry (registries, config) {
   registries.forEach(registry => {
     const { name } = registry
     const registryPath = path.join(cachePath, name)
-    
+
     if (!fs.existsSync(registryPath)) {
       mkdirs(registryPath, path.dirname(cachePath))
       const promise = pkg(name, { fullMetadata: true }).then(async metadata => {
@@ -112,7 +112,7 @@ async function downloadRegistry (registries, config) {
           .on('downloadProgress', ({ percent }) => {
             showProgress.renderProgressBar(Math.ceil(100 * percent), 100, "green", "red", "▓", "░", false)
           })
-        
+
         return new Promise((resolve, reject) => {
           stream.pipe(tar.x({
             strip: 1,
@@ -176,7 +176,7 @@ exports.handler = argvs => {
       return registries.shift() || {}
     }
     log.line()
-    
+
     do {
       let { name, path: p } = it()
       const registryPath = path.join(cachePath, name)
@@ -190,7 +190,7 @@ exports.handler = argvs => {
         installed = true
       }
     } while (registries.length && !installed)
-    
+
     if (!installed) {
       log.error('Invalid component name.')
       renderAscii()
