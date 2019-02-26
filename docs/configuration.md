@@ -12,7 +12,8 @@
   [
     {
       name: 'component-registry-name',  // 组件库名称
-      path: 'packages'                  // 组件所在的目录路径，相对于组件库根目录
+      path: 'packages',                 // 组件所在的目录路径，相对于组件库根目录
+      dependencies: ['mixins']          // 组件库中通用模块
     }
   ]
 ```

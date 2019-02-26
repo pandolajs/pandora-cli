@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/pandolajs/pandora-cli#readme",
   "devDependencies": {
-    "eslint": "^5.0.0",
+    "eslint": "^5.14.1",
     "eslint-config-pandola": "^2.0.0"
   },
   "dependencies": {
@@ -37,13 +37,14 @@
     "deep-extend": "^0.6.0",
     "del": "^3.0.0",
     "find-up": "^3.0.0",
+    "fs-extra": "^7.0.1",
     "globby": "^8.0.1",
     "got": "^8.3.1",
     "inquirer": "^6.0.0",
     "micromatch": "^3.1.10",
     "node-fetch": "^2.1.2",
     "npmi": "^4.0.0",
-    "ora": "^2.1.0",
+    "ora": "^3.1.0",
     "package-json": "^5.0.0",
     "tar": "^4.4.4",
     "yargs": "^11.0.0"
