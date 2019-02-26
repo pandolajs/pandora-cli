@@ -146,8 +146,11 @@ module.exports = {
   getGitUser () {
     let name = ''
     let email = ''
-    name = execSync('git config --global --get user.name')
-    email = execSync('git config --global --get user.email')
+    try {
+      name = execSync('git config --global --get user.name')
+      email = execSync('git config --global --get user.email')
+    } catch (error) {}
+
     return {
       name: name.toString().trim(),
       email: email.toString().trim()
