@@ -48,7 +48,7 @@
 
 接下来就会列出 `pa` 目前支持的脚手架列表，供你选择。选择好脚手架后开始初始化项目，完成后自动开始安装依赖。
 
-[pa-init](docs/resources/pa-init.gif)
+![pa-init](docs/resources/pa-init.gif)
 
 ### 启动开发环境 `pa start`
 
@@ -59,7 +59,7 @@
 
 pa start 会开启监听模式，在此模式下，我们修改的文件都会触发实时构建。
 
-[pa-start](docs/resources/pa-start.gif)
+![pa-start](docs/resources/pa-start.gif)
 
 ### 构建生产包 `pa build`
 
@@ -99,7 +99,7 @@ pa start 会开启监听模式，在此模式下，我们修改的文件都会�
   pa i
 ```
 
-[pa-install](docs/resources/pa-install.gif)
+![pa-install](docs/resources/pa-install.gif)
 
 ### 创建样板代码 `pa create` 或者 `pa i`
 
@@ -113,7 +113,7 @@ pa start 会开启监听模式，在此模式下，我们修改的文件都会�
 
 > 样板代码是可以自己配置的，具体的可以参考项目脚手架中 `.pandora/templates` 以及参考配置 `.pandora.conf.json` 中的 `templates` 字段
 
-[pa-create](docs/resources/pa-create.gif)
+![pa-create](docs/resources/pa-create.gif)
 
 更多命令可以参考 [Pandora-cli 命令详解](./docs/commands.md)
 
