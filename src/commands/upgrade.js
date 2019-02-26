@@ -12,8 +12,6 @@
  * 2. 更新 .pandora.conf.json 中脚手架的版本号
 */
 
-const { log, getConfig, getCwd, renderAscii, versionCompare, mkdirs, saveConfig } = require('../utils')
-const { DEFAULT_NAME, CACHE_DIR, HOOK_DIR } = require('../utils/constants')
 const pkg = require('package-json')
 const path = require('path')
 const fs = require('fs')
@@ -22,6 +20,10 @@ const tar = require('tar')
 const del = require('del')
 const showProgress = require('crimson-progressbar')
 const deepExtend = require('deep-extend')
+const ora = require('ora')
+
+const { log, getConfig, getCwd, renderAscii, versionCompare, mkdirs, saveConfig } = require('../utils')
+const { DEFAULT_NAME, CACHE_DIR, HOOK_DIR } = require('../utils/constants')
 
 exports.command = 'upgrade'
 
@@ -75,8 +77,12 @@ exports.handler = async argvs => {
   const isPandoraProject = !!Object.keys(confObj).length
   let { boilerplate: { name: boilerplate = b, version } = {} } = confObj
 
+  const spinner = ora()
+  spinner.start('checking ...')
+
   // 非 pandora 项目，且未指定 -b 参数
   if (!isPandoraProject && !boilerplate) {
+    spinner.fail('upgrading failed.')
     log.info(`This is not a pandora project. \n You may execute the command 'pa upgrade -b <boilplate-name>' to turn current project to pandora project.`)
     return renderAscii()
   }
@@ -89,6 +95,7 @@ exports.handler = async argvs => {
   }, config)
 
   if (!boilerplate) {
+    spinner.fail('upgrading failed.')
     log.error(`Invalid '${DEFAULT_NAME}': ${config}`)
     return renderAscii()
   }
@@ -109,18 +116,21 @@ exports.handler = async argvs => {
   const metadata = await pkg(boilerplate)
   const { version: remoteVersion } = metadata
 
-  // 非 pandora 项目不进行版本判断, 项目版本直接使用远程库 版本
+  // 非 pandora 项目不进行版本判断, 项目版本直接使用远程库版本
   if (isPandoraProject) {
     const compare = versionCompare(remoteVersion, version)
     if (!compare.upgrade) {
+      spinner.succeed('upgrading succed.')
       log.info(`Local boilerplate ${boilerplate} is already up to date.`)
       return renderAscii()
     } else {
       const { semver = '' } = compare
       if (semver === 'major' && !force) {
+        spinner.warn('major upgrade version is avaliable.')
         log.info(`Local boilerplate version is ${version}, the avaliable remote version is ${remoteVersion}. \n There are maybe some broken changes, please figure it out. \n You can upgrade force use command below: \n 'pa upgrade --force'`)
         return renderAscii()
       }
+      spinner.stop()
       log.info(`Local boilerplate version is ${version}, the avaliable remote version is ${remoteVersion}.`)
       log('Stat upgrading ...')
     }
@@ -138,9 +148,20 @@ exports.handler = async argvs => {
       copyDir(customSouScriptPath, customTarScriptPath, cwd)
       // deep merge package.json scripts field
       const curPkgPath = path.join(cwd, 'package.json')
-      const curPkg = require(curPkgPath)
+
+      let curPkg = {}
+      if (fs.existsSync(curPkgPath)) {
+        curPkg = require(curPkgPath)
+      } else {
+        curPkg = Object.assign({}, remotePkg, {
+          name: path.basename(cwd)
+        })
+      }
+
       fs.createWriteStream(curPkgPath).end(JSON.stringify(deepExtend({}, curPkg, {
-        scripts: remotePkg.scripts
+        scripts: remotePkg.scripts,
+        devDependencies: remotePkg.devDependencies,
+        dependencies: remotePkg.dependencies
       }), null, '  '))
 
       // replace build.config.js
