@@ -13,17 +13,20 @@
  * 5. 通过 keywords 中是否包含 ’miniprogram‘ 来判断是否为小程序脚手架
 */
 
-const { log, getConfig, getCwd, renderAscii, mkdirs } = require('../utils')
-const { CACHE_DIR } = require('../utils/constants')
 const path = require('path')
 const fs = require('fs')
+const fse = require('fs-extra')
 const pkg = require('package-json')
 const got = require('got')
 const tar = require('tar')
 const showProgress = require('crimson-progressbar')
 const del = require('del')
 const npmi = require('npmi')
+const ora = require('ora')
+
 const npmConf = require('../utils/npmConf')
+const { log, getConfig, getCwd, renderAscii, mkdirs } = require('../utils')
+const { CACHE_DIR } = require('../utils/constants')
 
 exports.command = 'install'
 
@@ -68,7 +71,7 @@ function copyComponent(from, to, version, cwd, registryName = componentRegisty) 
     const p = usingComponents[key]
     const cp = path.dirname(p)
     const dependency = path.resolve(from, cp)
-    copyComponent(dependency, path.resolve(to, cp), version, cwd)
+    copyComponent(dependency, path.resolve(to, cp), version, cwd, registryName)
   })
   log.success(`+ ${registryName}/${path.basename(from)}@${version}`)
 }
@@ -131,11 +134,15 @@ async function downloadRegistry (registries, config) {
 }
 
 exports.handler = argvs => {
+  const spinner = ora()
+  spinner.start('installing ...')
+
   const { _: [cmd, component], config, nocache, dest, npm, version, ...npmOptions } = argvs
   const { boilerplate: { keywords = [] } = {}, components = [] } = getConfig(config)
 
   let parentCmd = path.basename(process.argv[1])
-  if (component === undefined) {
+  if (keywords.includes('miniprogram') && !npm && component === undefined) {
+    spinner.fail('install failed.')
     log.error('You must specify a component name that you want to install.')
     log.line()
     log('Usage', null, false)
@@ -144,7 +151,8 @@ exports.handler = argvs => {
   }
 
   if (!keywords.includes('miniprogram') || npm ) {
-    const [ npmPkg, version = 'latest' ] = component.split('@')
+    spinner.stop()
+    const [ npmPkg, version = 'latest' ] = (component || '').split('@')
     return npmi({
       name: npmPkg,
       version,
@@ -155,7 +163,7 @@ exports.handler = argvs => {
       if (error) {
         return log.error(`install ${npmPkg} error.`)
       }
-      return log.success(`+ ${npmPkg}@${version}`)
+      return npmPkg ? log.success(`+ ${npmPkg}@${version}`) : ''
     })
   }
 
@@ -163,13 +171,22 @@ exports.handler = argvs => {
   const cachePath = path.join(cwd, CACHE_DIR)
 
   if (nocache) {
+    spinner.stop()
     log('Start cleaning cache ...')
     del.sync([cachePath])
     log('Finish cleaning cache.')
   }
 
+  spinner.stop()
   log(`Start install component ${component} ...`)
-  const registries = [...components, { name: '@pandolajs/pandora-ui-wechat' }]
+  const registries = [...components]
+  if (!registries.some(({ name }) => {
+    return name === componentRegisty
+  })) {
+    registries.push({
+      name: componentRegisty
+    })
+  }
   downloadRegistry(registries, config).then(() => {
     let installed = false
     function it () {
@@ -178,7 +195,7 @@ exports.handler = argvs => {
     log.line()
 
     do {
-      let { name, path: p } = it()
+      let { name, path: p, dependencies = [] } = it()
       const registryPath = path.join(cachePath, name)
       const { main, version } = require(path.join(registryPath, 'package.json'))
       if (!p) {
@@ -186,18 +203,33 @@ exports.handler = argvs => {
       }
       const componentPath = path.join(registryPath, p, component)
       if (fs.existsSync(componentPath)) {
-        copyComponent(componentPath, path.join(cwd, dest, component), version, cwd)
+        copyComponent(componentPath, path.join(cwd, dest, component), version, cwd, name)
+
+        // 非通过 usingComponents 申明的依赖，通过 components.dependencies: [] 来申明
+        dependencies.forEach((item) => {
+          const depenPathFrom = path.join(registryPath, p, item)
+          const depenPathTo = path.join(cwd, dest, item)
+
+          try {
+            fse.copySync(depenPathFrom, depenPathTo)
+          } catch(error){
+            log.error(`Install ${name}/${p}/${item} failed.`)
+            console.error(error)
+          }
+        })
         installed = true
       }
+
     } while (registries.length && !installed)
 
     if (!installed) {
       log.error('Invalid component name.')
       renderAscii()
     }
-  }).catch(() => {
+  }).catch((error) => {
     log.info(`Install component ${component} fail.`)
     log.info(`You can try cmd: '${parentCmd} install ${component} --no-cache' to fix it.`)
+    console.error(error)
     renderAscii()
   })
 }
