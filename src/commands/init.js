@@ -11,7 +11,6 @@
 */
 
 const Inquire = require('inquirer')
-const getList = require('../utils/get-list')
 const globMatch = require('micromatch')
 const path = require('path')
 const fs = require('fs')
@@ -21,6 +20,9 @@ const tar = require('tar')
 const npmi = require('npmi')
 const showProgress = require('crimson-progressbar')
 const deepExtend = require('deep-extend')
+const ora = require('ora')
+
+const getList = require('../utils/get-list')
 const { DEFAULT_NAME } = require('../utils/constants')
 const { log, getConfig, getGitUser, saveConfig, mkdir, renderAscii, template, readFiles, currentDate } = require('../utils')
 
@@ -81,6 +83,9 @@ function getBoilerplateMeta (boilerplate) {
 }
 
 exports.handler = async argvs => {
+  const spinner = ora()
+  spinner.start('checking ...')
+
   let { boilerplate, _: [cmd, name], author, email, config, ignores } = argvs
   const cwd = process.cwd()
 
@@ -129,6 +134,8 @@ exports.handler = async argvs => {
   } else {
     boilerplate = await getBoilerplateMeta(boilerplate)
   }
+
+  spinner.stop()
 
   // 如果选择的 boilerplate 是微信小程序，则输入 appId
   prompts.push({
