@@ -27,6 +27,8 @@ exports.handler = ({ _: cmds = [], ...argvs }) => {
     console.log('react-build', env)
   })
   pandora.build('dev')
+
+  const config = pandora.getConfig()
   return
   loadCmd({
     cmds,
