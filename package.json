@@ -4,7 +4,8 @@
   "description": "pandora cli",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug": "node --nolazy --inspect-brk=9229 ./bin/cli build"
   },
   "bin": {
     "pandola": "./bin/cli.js",
@@ -45,6 +46,7 @@
     "npmi": "^4.0.0",
     "ora": "^2.1.0",
     "package-json": "^5.0.0",
+    "tapable": "^1.1.1",
     "tar": "^4.4.4",
     "yargs": "^11.0.0"
   }

@@ -4,8 +4,8 @@
  * @version 1.0.0 | 2018-06-26 | sizhao       // 初始版本
 */
 
-const { DEFAULT_ENV } = require('../utils/constants') 
-const { log, loadCmd } = require('../utils')  
+const { DEFAULT_ENV } = require('../utils/constants')
+const { log, loadCmd } = require('../utils')
 
 exports.command = 'start'
 
@@ -23,6 +23,11 @@ exports.builder = {
 
 exports.handler = ({ _: cmds = [], ...argvs }) => {
   log('Start building ...')
+  pandora.hooks.build.tap('react-build', (env) => {
+    console.log('react-build', env)
+  })
+  pandora.build('dev')
+  return
   loadCmd({
     cmds,
     argvs,
