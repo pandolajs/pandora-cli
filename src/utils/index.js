@@ -13,6 +13,7 @@ const deepExtend = require('deep-extend')
 const globby = require('globby')
 const { HOOK_DIR } = require('./constants')
 const Inquirer = require('inquirer')
+const findup = require('find-up')
 
 function log (message = '', type, timestamp = true) {
   const date = new Date()
@@ -146,13 +147,16 @@ module.exports = {
   getGitUser () {
     let name = ''
     let email = ''
+    const isGitRepository = findup.sync('.git') !== null
+    const flag = isGitRepository ? '--local' : '--global'
+
     try {
-      name = execSync('git config --local --get user.name')
-      if (!name) {
+      name = execSync(`git config ${flag} --get user.name`)
+      if (!name && !isGitRepository) {
         name = execSync('git config --global --get user.name')
       }
-      email = execSync('git config --local --get user.email')
-      if (!email) {
+      email = execSync(`git config ${flag} --get user.email`)
+      if (!email && !isGitRepository) {
         email = execSync('git config --global --get user.email')
       }
     } catch (error) {}
