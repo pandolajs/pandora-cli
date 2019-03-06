@@ -42,7 +42,6 @@
     "got": "^8.3.1",
     "inquirer": "^6.0.0",
     "micromatch": "^3.1.10",
-    "node-fetch": "^2.1.2",
     "npmi": "^4.0.0",
     "ora": "^3.1.0",
     "package-json": "^5.0.0",

@@ -118,8 +118,8 @@ exports.handler = async argvs => {
       log.error(message)
     })
     const choices = list.map(item => {
-      const { name } = item
-      return name
+      const { name, version } = item
+      return `${name}@${version}`
     })
 
     prompts.push({
@@ -128,7 +128,8 @@ exports.handler = async argvs => {
       message: 'Please select a boilerplate that you want to use:',
       choices,
       filter (input) {
-        return getBoilerplateMeta(input)
+        const [ nouse, pkgName ] = input.split('@')
+        return getBoilerplateMeta(`@${pkgName}`)
       }
     })
   } else {

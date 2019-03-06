@@ -4,24 +4,14 @@
  * @version 1.0.0 | 2018-06-26 | sizhao       // 初始版本
 */
 
-const fetch = require('node-fetch')
-
-const api = 'https://api.npms.io/v2/search?q=scope:pandolajs+keywords:pandora-boilerplate'
+const { execSync } = require('child_process')
 
 module.exports = () => {
-  return fetch(api, { method: 'GET' }).then(response => {
-    const { status } = response
-    return status !== 200 ? Promise.reject(new Error('Get boilerplates failed.')) : response.json()
-  }).then(data => {
-    const { results = [] } = data
-    return results.map(pkg => {
-      const { package: { name, description, version, keywords } } = pkg
-      return {
-        name,
-        description,
-        version,
-        keywords
-      }
-    })
-  })
+  let list = []
+  try {
+    const listJSON = execSync('npm search --json /@pandolajs\/pandora-boilerplate-.+/')
+    list = JSON.parse(listJSON)
+  } catch(error) {}
+
+  return Promise.resolve(list)
 }
