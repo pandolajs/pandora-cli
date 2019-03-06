@@ -147,8 +147,14 @@ module.exports = {
     let name = ''
     let email = ''
     try {
-      name = execSync('git config --global --get user.name')
-      email = execSync('git config --global --get user.email')
+      name = execSync('git config --local --get user.name')
+      if (!name) {
+        name = execSync('git config --global --get user.name')
+      }
+      email = execSync('git config --local --get user.email')
+      if (!email) {
+        email = execSync('git config --global --get user.email')
+      }
     } catch (error) {}
 
     return {
