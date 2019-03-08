@@ -9,7 +9,7 @@ const { execSync } = require('child_process')
 module.exports = () => {
   let list = []
   try {
-    const listJSON = execSync('npm search --json /@pandolajs\/pandora-boilerplate-.+/')
+    const listJSON = execSync('npm search --json --registry https://registry.npmjs.com/ /@pandolajs\/pandora-boilerplate-.+/')
     list = JSON.parse(listJSON)
   } catch(error) {}
 
